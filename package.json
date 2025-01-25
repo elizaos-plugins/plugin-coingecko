@@ -14,5 +14,16 @@
         "build": "tsup --format esm --dts",
         "dev": "tsup --format esm --dts --watch",
         "test": "vitest run"
+    },
+    "agentConfig": {
+        "pluginType": "elizaos:client:1.0.0",
+        "pluginParameters": {
+            "COINGECKO_API_KEY": {
+                "type": "string"
+            },
+            "COINGECKO_PRO_API_KEY": {
+                "type": "string"
+            }
+        }
     }
 }
