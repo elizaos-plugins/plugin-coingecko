@@ -2,8 +2,7 @@
     "extends": "../core/tsconfig.json",
     "compilerOptions": {
         "outDir": "dist",
-        "rootDir": "src",
-        "types": ["lodash"]
+        "rootDir": "src"
     },
     "include": [
         "src/**/*.ts"
