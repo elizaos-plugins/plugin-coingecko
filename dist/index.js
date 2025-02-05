@@ -3952,13 +3952,13 @@ var CACHE_TTL = 5 * 60;
 var MAX_RETRIES = 3;
 async function fetchCategories(runtime) {
   const config = await validateCoingeckoConfig(runtime);
-  const { baseUrl, apiKey } = getApiConfig(config);
+  const { baseUrl, apiKey, headerKey } = getApiConfig(config);
   const response = await axios.get(
     `${baseUrl}/coins/categories/list`,
     {
       headers: {
         "accept": "application/json",
-        "x-cg-pro-api-key": apiKey
+        [headerKey]: apiKey
       },
       timeout: 5e3
       // 5 second timeout
@@ -4019,6 +4019,7 @@ You can use these category IDs when filtering cryptocurrency market data.
 `.trim();
 }
 var categoriesProvider = {
+  // eslint-disable-next-line
   get: async (runtime, message, state) => {
     try {
       const categories = await getCategories(runtime);
@@ -4134,7 +4135,8 @@ var getMarkets_default = {
     "BEST_PERFORMING_COINS",
     "TOP_MARKET_CAPS"
   ],
-  validate: async (runtime, message) => {
+  // eslint-disable-next-line
+  validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
     return true;
   },
@@ -4142,17 +4144,18 @@ var getMarkets_default = {
   description: "Get ranked list of top cryptocurrencies sorted by market metrics (without specifying coins)",
   handler: async (runtime, message, state, _options, callback) => {
     elizaLogger2.log("Starting CoinGecko GET_MARKETS handler...");
-    if (!state) {
-      state = await runtime.composeState(message);
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
     } else {
-      state = await runtime.updateRecentMessageState(state);
+      currentState = await runtime.updateRecentMessageState(currentState);
     }
     try {
       const config = await validateCoingeckoConfig(runtime);
-      const { baseUrl, apiKey } = getApiConfig(config);
+      const { baseUrl, apiKey, headerKey } = getApiConfig(config);
       const categories = await getCategoriesData(runtime);
       const marketsContext = composeContext({
-        state,
+        state: currentState,
         template: getMarketsTemplate.replace(
           "{{categories}}",
           categories.map((c) => `- ${c.name} (ID: ${c.category_id})`).join("\n")
@@ -4190,7 +4193,7 @@ var getMarkets_default = {
         {
           headers: {
             "accept": "application/json",
-            "x-cg-pro-api-key": apiKey
+            [headerKey]: apiKey
           },
           params: {
             vs_currency: content.vs_currency,
@@ -4314,7 +4317,7 @@ var CACHE_TTL2 = 5 * 60;
 var MAX_RETRIES2 = 3;
 async function fetchCoins(runtime, includePlatform = false) {
   const config = await validateCoingeckoConfig(runtime);
-  const { baseUrl, apiKey } = getApiConfig(config);
+  const { baseUrl, apiKey, headerKey } = getApiConfig(config);
   const response = await axios3.get(
     `${baseUrl}/coins/list`,
     {
@@ -4323,7 +4326,7 @@ async function fetchCoins(runtime, includePlatform = false) {
       },
       headers: {
         "accept": "application/json",
-        "x-cg-pro-api-key": apiKey
+        [headerKey]: apiKey
       },
       timeout: 5e3
       // 5 second timeout
@@ -4385,6 +4388,7 @@ You can use these coin IDs when querying specific cryptocurrency data.
 `.trim();
 }
 var coinsProvider = {
+  // eslint-disable-next-line
   get: async (runtime, message, state) => {
     try {
       const coins = await getCoins(runtime);
@@ -4494,22 +4498,24 @@ var getPrice_default = {
     "PRICE_DETAILS",
     "COIN_PRICE_DATA"
   ],
-  validate: async (runtime, message) => {
+  // eslint-disable-next-line
+  validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
     return true;
   },
   description: "Get price and basic market data for one or more specific cryptocurrencies (by name/symbol)",
   handler: async (runtime, message, state, _options, callback) => {
     elizaLogger4.log("Starting CoinGecko GET_PRICE handler...");
-    if (!state) {
-      state = await runtime.composeState(message);
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
     } else {
-      state = await runtime.updateRecentMessageState(state);
+      currentState = await runtime.updateRecentMessageState(currentState);
     }
     try {
       elizaLogger4.log("Composing price context...");
       const priceContext = composeContext2({
-        state,
+        state: currentState,
         template: getPriceTemplate
       });
       elizaLogger4.log("Generating content from template...");
@@ -4530,7 +4536,7 @@ var getPrice_default = {
       const coinIds = formatCoinIds(content.coinIds);
       elizaLogger4.log("Formatted request parameters:", { coinIds, vs_currencies });
       const config = await validateCoingeckoConfig(runtime);
-      const { baseUrl, apiKey } = getApiConfig(config);
+      const { baseUrl, apiKey, headerKey } = getApiConfig(config);
       elizaLogger4.log(`Fetching prices for ${coinIds} in ${vs_currencies}...`);
       elizaLogger4.log("API request URL:", `${baseUrl}/simple/price`);
       elizaLogger4.log("API request params:", {
@@ -4554,7 +4560,7 @@ var getPrice_default = {
           },
           headers: {
             "accept": "application/json",
-            "x-cg-pro-api-key": apiKey
+            [headerKey]: apiKey
           }
         }
       );
@@ -4565,8 +4571,8 @@ var getPrice_default = {
       const formattedResponse = Object.entries(response.data).map(([coinId, data]) => {
         const coin = coins.find((c) => c.id === coinId);
         const coinName = coin ? `${coin.name} (${coin.symbol.toUpperCase()})` : coinId;
-        const parts = [coinName + ":"];
-        currencies.forEach((currency) => {
+        const parts = [`${coinName}:`];
+        for (const currency of currencies) {
           const upperCurrency = currency.toUpperCase();
           if (data[currency]) {
             parts.push(`  ${upperCurrency}: ${data[currency].toLocaleString(void 0, {
@@ -4601,7 +4607,7 @@ var getPrice_default = {
               parts.push(`  24h Change (${upperCurrency}): ${changePrefix}${change.toFixed(2)}%`);
             }
           }
-        });
+        }
         if (content.include_last_updated_at && data.last_updated_at) {
           const lastUpdated = new Date(data.last_updated_at * 1e3).toLocaleString();
           parts.push(`  Last Updated: ${lastUpdated}`);
@@ -4617,19 +4623,21 @@ var getPrice_default = {
         callback({
           text: responseText,
           content: {
-            prices: Object.entries(response.data).reduce((acc, [coinId, data]) => ({
-              ...acc,
-              [coinId]: currencies.reduce((currencyAcc, currency) => ({
-                ...currencyAcc,
-                [currency]: {
+            prices: Object.entries(response.data).reduce((acc, [coinId, data]) => {
+              const coinPrices = currencies.reduce((currencyAcc, currency) => {
+                const currencyData = {
                   price: data[currency],
                   marketCap: data[`${currency}_market_cap`],
                   volume24h: data[`${currency}_24h_vol`],
                   change24h: data[`${currency}_24h_change`],
                   lastUpdated: data.last_updated_at
-                }
-              }), {})
-            }), {}),
+                };
+                Object.assign(currencyAcc, { [currency]: currencyData });
+                return currencyAcc;
+              }, {});
+              Object.assign(acc, { [coinId]: coinPrices });
+              return acc;
+            }, {}),
             params: {
               currencies: currencies.map((c) => c.toUpperCase()),
               include_market_cap: content.include_market_cap,
@@ -4650,7 +4658,6 @@ var getPrice_default = {
         errorMessage = "This endpoint requires a CoinGecko Pro API key. Please upgrade your plan to access this data.";
       } else if (error.response?.status === 400) {
         errorMessage = "Invalid request parameters. Please check your input.";
-      } else {
       }
       if (callback) {
         callback({
@@ -4712,7 +4719,7 @@ var getPrice_default = {
   ]
 };
 
-// src/actions/getTopGainersLosers.ts
+// src/actions/getPricePerAddress.ts
 import {
   composeContext as composeContext3,
   elizaLogger as elizaLogger5,
@@ -4720,6 +4727,217 @@ import {
   ModelClass as ModelClass3
 } from "@elizaos/core";
 import axios5 from "axios";
+
+// src/templates/priceAddress.ts
+var getPriceByAddressTemplate = `
+Extract the following parameters for token price data:
+- **chainId** (string): The blockchain network ID (e.g., "ethereum", "polygon", "binance-smart-chain")
+- **tokenAddress** (string): The contract address of the token
+- **include_market_cap** (boolean): Whether to include market cap data - defaults to true
+
+Normalize chain IDs to lowercase names: ethereum, polygon, binance-smart-chain, avalanche, fantom, arbitrum, optimism, etc.
+Token address should be the complete address string, maintaining its original case.
+
+Provide the values in the following JSON format:
+
+\`\`\`json
+{
+    "chainId": "ethereum",
+    "tokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "include_market_cap": true
+}
+\`\`\`
+
+Example request: "What's the price of USDC on Ethereum? Address: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+Example response:
+\`\`\`json
+{
+    "chainId": "ethereum",
+    "tokenAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "include_market_cap": true
+}
+\`\`\`
+
+Example request: "Check the price for this token on Polygon: 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+Example response:
+\`\`\`json
+{
+    "chainId": "polygon",
+    "tokenAddress": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+    "include_market_cap": true
+}
+\`\`\`
+
+Example request: "Get price for BONK token on Solana with address HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"
+Example response:
+\`\`\`json
+{
+    "chainId": "solana",
+    "tokenAddress": "HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"
+}
+\`\`\`
+
+Here are the recent user messages for context:
+{{recentMessages}}
+
+Based on the conversation above, use last question made and if the request is for token price data and includes both a chain and address, extract the appropriate parameters and respond with a JSON object. If the request is not related to token price data or missing required information, respond with null.`;
+
+// src/actions/getPricePerAddress.ts
+var GetTokenPriceSchema = z.object({
+  chainId: z.string(),
+  tokenAddress: z.string()
+});
+var isGetTokenPriceContent = (obj) => {
+  return GetTokenPriceSchema.safeParse(obj).success;
+};
+var getPricePerAddress_default = {
+  name: "GET_TOKEN_PRICE_BY_ADDRESS",
+  similes: [
+    "FETCH_TOKEN_PRICE_BY_ADDRESS",
+    "CHECK_TOKEN_PRICE_BY_ADDRESS",
+    "LOOKUP_TOKEN_BY_ADDRESS"
+  ],
+  // eslint-disable-next-line
+  validate: async (runtime, _message) => {
+    await validateCoingeckoConfig(runtime);
+    return true;
+  },
+  description: "Get the current USD price for a token using its blockchain address",
+  handler: async (runtime, message, state, _options, callback) => {
+    elizaLogger5.log("Starting GET_TOKEN_PRICE_BY_ADDRESS handler...");
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
+    } else {
+      currentState = await runtime.updateRecentMessageState(currentState);
+    }
+    try {
+      elizaLogger5.log("Composing token price context...");
+      const context = composeContext3({
+        state: currentState,
+        template: getPriceByAddressTemplate
+      });
+      elizaLogger5.log("Generating content from template...");
+      const result = await generateObject3({
+        runtime,
+        context,
+        modelClass: ModelClass3.SMALL,
+        schema: GetTokenPriceSchema
+      });
+      if (!isGetTokenPriceContent(result.object)) {
+        elizaLogger5.error("Invalid token price request format");
+        return false;
+      }
+      const content = result.object;
+      elizaLogger5.log("Generated content:", content);
+      const config = await validateCoingeckoConfig(runtime);
+      const { baseUrl, apiKey, headerKey } = getApiConfig(config);
+      elizaLogger5.log("Fetching token data...");
+      const response = await axios5.get(
+        `${baseUrl}/coins/${content.chainId}/contract/${content.tokenAddress}`,
+        {
+          headers: {
+            accept: "application/json",
+            [headerKey]: apiKey
+          }
+        }
+      );
+      const tokenData = response.data;
+      if (!tokenData.market_data?.current_price?.usd) {
+        throw new Error(
+          `No price data available for token ${content.tokenAddress} on ${content.chainId}`
+        );
+      }
+      const parts = [
+        `${tokenData.name} (${tokenData.symbol.toUpperCase()})`,
+        `Address: ${content.tokenAddress}`,
+        `Chain: ${content.chainId}`,
+        `Price: $${tokenData.market_data.current_price.usd.toFixed(6)} USD`
+      ];
+      if (tokenData.market_data.market_cap?.usd) {
+        parts.push(
+          `Market Cap: $${tokenData.market_data.market_cap.usd.toLocaleString()} USD`
+        );
+      }
+      const responseText = parts.join("\n");
+      elizaLogger5.success("Token price data retrieved successfully!");
+      if (callback) {
+        callback({
+          text: responseText,
+          content: {
+            token: {
+              name: tokenData.name,
+              symbol: tokenData.symbol,
+              address: content.tokenAddress,
+              chain: content.chainId,
+              price: tokenData.market_data.current_price.usd,
+              marketCap: tokenData.market_data.market_cap?.usd
+            }
+          }
+        });
+      }
+      return true;
+    } catch (error) {
+      elizaLogger5.error(
+        "Error in GET_TOKEN_PRICE_BY_ADDRESS handler:",
+        error
+      );
+      let errorMessage;
+      if (error.response?.status === 429) {
+        errorMessage = "Rate limit exceeded. Please try again later.";
+      } else if (error.response?.status === 403) {
+        errorMessage = "This endpoint requires a CoinGecko Pro API key. Please upgrade your plan to access this data.";
+      } else if (error.response?.status === 400) {
+        errorMessage = "Invalid request parameters. Please check your input.";
+      } else {
+        errorMessage = "Failed to fetch token price. Please try again later.";
+      }
+      if (callback) {
+        callback({
+          text: errorMessage,
+          content: {
+            error: error.message,
+            statusCode: error.response?.status,
+            requiresProPlan: error.response?.status === 403
+          }
+        });
+      }
+      return false;
+    }
+  },
+  examples: [
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "What's the price of the USDC token on Ethereum? The address is 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll check the USDC token price for you.",
+          action: "GET_TOKEN_PRICE_BY_ADDRESS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "USD Coin (USDC)\nAddress: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\nChain: ethereum\nPrice: {{dynamic}} USD\nMarket Cap: ${{dynamic}} USD"
+        }
+      }
+    ]
+  ]
+};
+
+// src/actions/getTopGainersLosers.ts
+import {
+  composeContext as composeContext4,
+  elizaLogger as elizaLogger6,
+  generateObject as generateObject4,
+  ModelClass as ModelClass4
+} from "@elizaos/core";
+import axios6 from "axios";
 
 // src/templates/gainersLosers.ts
 var getTopGainersLosersTemplate = `
@@ -4792,46 +5010,48 @@ var getTopGainersLosers_default = {
     "PRICE_CHANGES",
     "BEST_WORST_PERFORMERS"
   ],
-  validate: async (runtime, message) => {
+  // eslint-disable-next-line
+  validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
     return true;
   },
   description: "Get list of top gaining and losing cryptocurrencies by price change",
   handler: async (runtime, message, state, _options, callback) => {
-    elizaLogger5.log("Starting CoinGecko GET_TOP_GAINERS_LOSERS handler...");
-    if (!state) {
-      state = await runtime.composeState(message);
+    elizaLogger6.log("Starting CoinGecko GET_TOP_GAINERS_LOSERS handler...");
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
     } else {
-      state = await runtime.updateRecentMessageState(state);
+      currentState = await runtime.updateRecentMessageState(currentState);
     }
     try {
-      elizaLogger5.log("Composing gainers/losers context...");
-      const context = composeContext3({
-        state,
+      elizaLogger6.log("Composing gainers/losers context...");
+      const context = composeContext4({
+        state: currentState,
         template: getTopGainersLosersTemplate
       });
-      elizaLogger5.log("Generating content from template...");
-      const result = await generateObject3({
+      elizaLogger6.log("Generating content from template...");
+      const result = await generateObject4({
         runtime,
         context,
-        modelClass: ModelClass3.LARGE,
+        modelClass: ModelClass4.LARGE,
         schema: GetTopGainersLosersSchema
       });
       if (!isGetTopGainersLosersContent(result.object)) {
-        elizaLogger5.error("Invalid gainers/losers request format");
+        elizaLogger6.error("Invalid gainers/losers request format");
         return false;
       }
       const content = result.object;
-      elizaLogger5.log("Generated content:", content);
+      elizaLogger6.log("Generated content:", content);
       const config = await validateCoingeckoConfig(runtime);
       const { baseUrl, apiKey, headerKey } = getApiConfig(config);
-      elizaLogger5.log("Fetching top gainers/losers data...");
-      elizaLogger5.log("API request params:", {
+      elizaLogger6.log("Fetching top gainers/losers data...");
+      elizaLogger6.log("API request params:", {
         vs_currency: content.vs_currency,
         duration: content.duration,
         top_coins: content.top_coins
       });
-      const response = await axios5.get(
+      const response = await axios6.get(
         `${baseUrl}/coins/top_gainers_losers`,
         {
           headers: {
@@ -4878,7 +5098,7 @@ var getTopGainersLosers_default = {
       }
       return true;
     } catch (error) {
-      elizaLogger5.error("Error in GET_TOP_GAINERS_LOSERS handler:", error);
+      elizaLogger6.error("Error in GET_TOP_GAINERS_LOSERS handler:", error);
       let errorMessage;
       if (error.response?.status === 429) {
         errorMessage = "Rate limit exceeded. Please try again later.";
@@ -4951,12 +5171,12 @@ var getTopGainersLosers_default = {
 
 // src/actions/getTrending.ts
 import {
-  composeContext as composeContext4,
-  elizaLogger as elizaLogger6,
-  generateObject as generateObject4,
-  ModelClass as ModelClass4
+  composeContext as composeContext5,
+  elizaLogger as elizaLogger7,
+  generateObject as generateObject5,
+  ModelClass as ModelClass5
 } from "@elizaos/core";
-import axios6 from "axios";
+import axios7 from "axios";
 
 // src/templates/trending.ts
 var getTrendingTemplate = `
@@ -5013,38 +5233,40 @@ var getTrending_default = {
     "POPULAR_COINS",
     "TRENDING_SEARCH"
   ],
-  validate: async (runtime, message) => {
+  // eslint-disable-next-line
+  validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
     return true;
   },
   description: "Get list of trending cryptocurrencies, NFTs, and categories from CoinGecko",
   handler: async (runtime, message, state, _options, callback) => {
-    elizaLogger6.log("Starting CoinGecko GET_TRENDING handler...");
-    if (!state) {
-      state = await runtime.composeState(message);
+    elizaLogger7.log("Starting CoinGecko GET_TRENDING handler...");
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
     } else {
-      state = await runtime.updateRecentMessageState(state);
+      currentState = await runtime.updateRecentMessageState(currentState);
     }
     try {
-      elizaLogger6.log("Composing trending context...");
-      const trendingContext = composeContext4({
-        state,
+      elizaLogger7.log("Composing trending context...");
+      const trendingContext = composeContext5({
+        state: currentState,
         template: getTrendingTemplate
       });
-      const result = await generateObject4({
+      const result = await generateObject5({
         runtime,
         context: trendingContext,
-        modelClass: ModelClass4.LARGE,
+        modelClass: ModelClass5.LARGE,
         schema: GetTrendingSchema
       });
       if (!isGetTrendingContent(result.object)) {
-        elizaLogger6.error("Invalid trending request format");
+        elizaLogger7.error("Invalid trending request format");
         return false;
       }
       const config = await validateCoingeckoConfig(runtime);
       const { baseUrl, apiKey, headerKey } = getApiConfig(config);
-      elizaLogger6.log("Fetching trending data...");
-      const response = await axios6.get(
+      elizaLogger7.log("Fetching trending data...");
+      const response = await axios7.get(
         `${baseUrl}/search/trending`,
         {
           headers: {
@@ -5087,7 +5309,7 @@ var getTrending_default = {
         "Trending Categories:",
         ...formattedData.categories.length ? formattedData.categories.map((category, index) => `${index + 1}. ${category.name}`) : ["No trending categories available"]
       ].join("\n");
-      elizaLogger6.success("Trending data retrieved successfully!");
+      elizaLogger7.success("Trending data retrieved successfully!");
       if (callback) {
         callback({
           text: responseText,
@@ -5099,7 +5321,7 @@ var getTrending_default = {
       }
       return true;
     } catch (error) {
-      elizaLogger6.error("Error in GET_TRENDING handler:", error);
+      elizaLogger7.error("Error in GET_TRENDING handler:", error);
       const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending data: ${error.message}`;
       if (callback) {
         callback({
@@ -5159,13 +5381,1017 @@ var getTrending_default = {
   ]
 };
 
+// src/actions/getTrendingPools.ts
+import {
+  composeContext as composeContext6,
+  elizaLogger as elizaLogger8,
+  generateObject as generateObject6,
+  ModelClass as ModelClass6
+} from "@elizaos/core";
+import axios8 from "axios";
+
+// src/templates/trendingPools.ts
+var getTrendingPoolsTemplate = `Determine if this is a trending pools request. If it is one of the specified situations, perform the corresponding action:
+
+Situation 1: "Get all trending pools"
+- Message contains: phrases like "all trending pools", "show all pools", "list all pools"
+- Example: "Show me all trending pools" or "List all pools"
+- Action: Return with limit=100
+
+Situation 2: "Get specific number of pools"
+- Message contains: number followed by "pools" or "top" followed by number and "pools"
+- Example: "Show top 5 pools" or "Get me 20 trending pools"
+- Action: Return with limit=specified number
+
+Situation 3: "Default trending pools request"
+- Message contains: general phrases like "trending pools", "hot pools", "popular pools"
+- Example: "What are the trending pools?" or "Show me hot pools"
+- Action: Return with limit=10
+
+For all situations, respond with a JSON object in the format:
+\`\`\`json
+{
+    "limit": number
+}
+\`\`\`
+
+Previous conversation for context:
+{{conversation}}
+
+You are replying to: {{message}}
+`;
+
+// src/actions/getTrendingPools.ts
+var GetTrendingPoolsSchema = z.object({
+  limit: z.number().min(1).max(100).default(10)
+});
+var isGetTrendingPoolsContent = (obj) => {
+  return GetTrendingPoolsSchema.safeParse(obj).success;
+};
+var getTrendingPools_default = {
+  name: "GET_TRENDING_POOLS",
+  similes: ["TRENDING_POOLS", "HOT_POOLS", "POPULAR_POOLS", "TOP_POOLS"],
+  validate: async (runtime, _message) => {
+    await validateCoingeckoConfig(runtime);
+    return true;
+  },
+  description: "Get list of trending pools from CoinGecko's onchain data",
+  handler: async (runtime, message, state, _options, callback) => {
+    elizaLogger8.log("Starting CoinGecko GET_TRENDING_POOLS handler...");
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
+    } else {
+      currentState = await runtime.updateRecentMessageState(currentState);
+    }
+    try {
+      elizaLogger8.log("Composing trending pools context...");
+      const trendingContext = composeContext6({
+        state: currentState,
+        template: getTrendingPoolsTemplate
+      });
+      const result = await generateObject6({
+        runtime,
+        context: trendingContext,
+        modelClass: ModelClass6.LARGE,
+        schema: GetTrendingPoolsSchema
+      });
+      if (!isGetTrendingPoolsContent(result.object)) {
+        elizaLogger8.error("Invalid trending pools request format");
+        return false;
+      }
+      const config = await validateCoingeckoConfig(runtime);
+      const { baseUrl, apiKey, headerKey } = getApiConfig(config);
+      elizaLogger8.log("Fetching trending pools data...");
+      const response = await axios8.get(
+        `${baseUrl}/onchain/networks/trending_pools?include=base_token,dex`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
+      if (!response.data) {
+        throw new Error("No data received from CoinGecko API");
+      }
+      const formattedData = response.data.data.map((pool) => ({
+        name: pool.attributes.name,
+        marketCap: Number(
+          pool.attributes.market_cap_usd
+        ).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD"
+        }),
+        fdv: Number(pool.attributes.fdv_usd).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD"
+        }),
+        reserveUSD: Number(
+          pool.attributes.reserve_in_usd
+        ).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD"
+        }),
+        createdAt: new Date(
+          pool.attributes.pool_created_at
+        ).toLocaleDateString()
+      }));
+      const responseText = [
+        "Trending Pools Overview:",
+        "",
+        ...formattedData.map(
+          (pool, index) => [
+            `${index + 1}. ${pool.name}`,
+            `   Market Cap: ${pool.marketCap}`,
+            `   FDV: ${pool.fdv}`,
+            `   Reserve: ${pool.reserveUSD}`,
+            `   Created: ${pool.createdAt}`,
+            ""
+          ].join("\n")
+        )
+      ].join("\n");
+      elizaLogger8.success("Trending pools data retrieved successfully!");
+      if (callback) {
+        callback({
+          text: responseText,
+          content: {
+            trendingPools: formattedData,
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
+        });
+      }
+      return true;
+    } catch (error) {
+      elizaLogger8.error("Error in GET_TRENDING_POOLS handler:", error);
+      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending pools data: ${error.message}`;
+      if (callback) {
+        callback({
+          text: errorMessage,
+          content: {
+            error: error.message,
+            statusCode: error.response?.status
+          }
+        });
+      }
+      return false;
+    }
+  },
+  examples: [
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "Show me trending liquidity pools"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll check the trending liquidity pools for you.",
+          action: "GET_TRENDING_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are the trending liquidity pools:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025"
+        }
+      }
+    ],
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "What are the top hottest dex pools?"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll fetch the top hottest DEX pools for you.",
+          action: "GET_TRENDING_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are the top 5 hottest DEX pools:\n1. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025\n2. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
+    ],
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "List all trading pools with highest volume"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll get all the trending trading pools for you.",
+          action: "GET_TRENDING_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are all trending trading pools:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025"
+        }
+      }
+    ]
+  ]
+};
+
+// src/actions/getNewlyListed.ts
+import {
+  composeContext as composeContext7,
+  elizaLogger as elizaLogger9,
+  generateObject as generateObject7,
+  ModelClass as ModelClass7
+} from "@elizaos/core";
+import axios9 from "axios";
+
+// src/templates/newCoins.ts
+var getNewCoinsTemplate = `Determine if this is a new coins request. If it is one of the specified situations, perform the corresponding action:
+
+Situation 1: "Get all new coins"
+- Message contains: phrases like "all new coins", "all recent listings", "all latest coins"
+- Example: "Show me all new coin listings" or "List all recently added coins"
+- Action: Return with limit=50
+
+Situation 2: "Get specific number of new coins"
+- Message contains: number followed by "new coins" or "latest" followed by number and "coins"
+- Example: "Show me 5 new coins" or "Get the latest 20 coins"
+- Action: Return with limit=specified number
+
+Situation 3: "Default new coins request"
+- Message contains: general phrases like "new coins", "recent listings", "latest coins"
+- Example: "What are the newest coins?" or "Show me recent listings"
+- Action: Return with limit=10
+
+For all situations, respond with a JSON object in the format:
+\`\`\`json
+{
+    "limit": number
+}
+\`\`\`
+
+Previous conversation for context:
+{{conversation}}
+
+You are replying to: {{message}}
+`;
+
+// src/actions/getNewlyListed.ts
+var GetNewCoinsSchema = z.object({
+  limit: z.number().min(1).max(50).default(10)
+});
+var isGetNewCoinsContent = (obj) => {
+  return GetNewCoinsSchema.safeParse(obj).success;
+};
+var getNewlyListed_default = {
+  name: "GET_NEW_COINS",
+  similes: [
+    "NEW_COINS",
+    "RECENTLY_ADDED",
+    "NEW_LISTINGS",
+    "LATEST_COINS"
+  ],
+  validate: async (runtime, _message) => {
+    await validateCoingeckoConfig(runtime);
+    return true;
+  },
+  description: "Get list of recently added coins from CoinGecko",
+  handler: async (runtime, message, state, _options, callback) => {
+    elizaLogger9.log("Starting CoinGecko GET_NEW_COINS handler...");
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
+    } else {
+      currentState = await runtime.updateRecentMessageState(currentState);
+    }
+    try {
+      elizaLogger9.log("Composing new coins context...");
+      const newCoinsContext = composeContext7({
+        state: currentState,
+        template: getNewCoinsTemplate
+      });
+      const result = await generateObject7({
+        runtime,
+        context: newCoinsContext,
+        modelClass: ModelClass7.LARGE,
+        schema: GetNewCoinsSchema
+      });
+      if (!isGetNewCoinsContent(result.object)) {
+        elizaLogger9.error("Invalid new coins request format");
+        return false;
+      }
+      const config = await validateCoingeckoConfig(runtime);
+      const { baseUrl, apiKey, headerKey } = getApiConfig(config);
+      elizaLogger9.log("Fetching new coins data...");
+      const response = await axios9.get(
+        `${baseUrl}/coins/list/new`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
+      if (!response.data) {
+        throw new Error("No data received from CoinGecko API");
+      }
+      const formattedData = response.data.slice(0, result.object.limit).map((coin) => ({
+        name: coin.name,
+        symbol: coin.symbol.toUpperCase(),
+        activatedAt: new Date(coin.activated_at * 1e3).toLocaleString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        })
+      }));
+      const responseText = [
+        "Recently Added Coins:",
+        "",
+        ...formattedData.map(
+          (coin, index) => `${index + 1}. ${coin.name} (${coin.symbol})
+   Listed: ${coin.activatedAt}`
+        )
+      ].join("\n");
+      elizaLogger9.success("New coins data retrieved successfully!");
+      if (callback) {
+        callback({
+          text: responseText,
+          content: {
+            newCoins: formattedData,
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
+        });
+      }
+      return true;
+    } catch (error) {
+      elizaLogger9.error("Error in GET_NEW_COINS handler:", error);
+      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching new coins data: ${error.message}`;
+      if (callback) {
+        callback({
+          text: errorMessage,
+          content: {
+            error: error.message,
+            statusCode: error.response?.status
+          }
+        });
+      }
+      return false;
+    }
+  },
+  examples: [
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "What are the newest coins listed?"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll check the recently added coins for you.",
+          action: "GET_NEW_COINS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are the recently added coins:\n1. Verb Ai (VERB)\n   Listed: January 20, 2025, 12:31 PM\n{{dynamic}}"
+        }
+      }
+    ]
+  ]
+};
+
+// src/actions/getNetworkTrendingPools.ts
+import {
+  composeContext as composeContext8,
+  elizaLogger as elizaLogger11,
+  generateObject as generateObject8,
+  ModelClass as ModelClass8
+} from "@elizaos/core";
+import axios11 from "axios";
+
+// src/templates/networkTrendingPools.ts
+var getNetworkTrendingPoolsTemplate = `Determine if this is a network-specific trending pools request. If it is one of the specified situations, extract the network ID and limit:
+
+Situation 1: "Get network trending pools"
+- Message contains: network name (e.g., "solana", "ethereum", "bsc") AND phrases about pools
+- Example: "Show trending pools on Solana" or "What are the hot pools on ETH?"
+- Action: Extract network ID and use default limit
+
+Situation 2: "Get specific number of network pools"
+- Message contains: number AND network name AND pools reference
+- Example: "Show top 5 pools on BSC" or "Get 20 trending pools on Ethereum"
+- Action: Extract network ID and specific limit
+
+Situation 3: "Get all network pools"
+- Message contains: "all" AND network name AND pools reference
+- Example: "Show all trending pools on Polygon" or "List all hot pools on Avalanche"
+- Action: Extract network ID and set maximum limit
+
+Network ID mappings:
+- "solana", "sol" => "solana"
+- "ethereum", "eth" => "eth"
+- "binance smart chain", "bsc", "bnb chain" => "bsc"
+- "polygon", "matic" => "polygon_pos"
+- "avalanche", "avax" => "avax"
+
+For all situations, respond with a JSON object in the format:
+\`\`\`json
+{
+    "networkId": string,
+    "limit": number
+}
+\`\`\`
+
+Previous conversation for context:
+{{conversation}}
+
+You are replying to: {{message}}
+`;
+
+// src/providers/networkProvider.ts
+import {
+  elizaLogger as elizaLogger10
+} from "@elizaos/core";
+import axios10 from "axios";
+var CACHE_KEY3 = "coingecko:networks";
+var CACHE_TTL3 = 30 * 60;
+var MAX_RETRIES3 = 3;
+async function fetchNetworks(runtime) {
+  const config = await validateCoingeckoConfig(runtime);
+  const { baseUrl, apiKey, headerKey } = getApiConfig(config);
+  const response = await axios10.get(
+    `${baseUrl}/onchain/networks`,
+    {
+      headers: {
+        accept: "application/json",
+        [headerKey]: apiKey
+      },
+      timeout: 5e3
+      // 5 second timeout
+    }
+  );
+  if (!response.data?.data?.length) {
+    throw new Error("Invalid networks data received");
+  }
+  return response.data.data;
+}
+async function fetchWithRetry3(runtime) {
+  let lastError = null;
+  for (let i = 0; i < MAX_RETRIES3; i++) {
+    try {
+      return await fetchNetworks(runtime);
+    } catch (error) {
+      lastError = error;
+      elizaLogger10.error(`Networks fetch attempt ${i + 1} failed:`, error);
+      await new Promise((resolve) => setTimeout(resolve, 1e3 * (i + 1)));
+    }
+  }
+  throw lastError || new Error("Failed to fetch networks after multiple attempts");
+}
+async function getNetworks(runtime) {
+  try {
+    const cached = await runtime.cacheManager.get(CACHE_KEY3);
+    if (cached) {
+      return cached;
+    }
+    const networks = await fetchWithRetry3(runtime);
+    await runtime.cacheManager.set(CACHE_KEY3, networks, {
+      expires: CACHE_TTL3
+    });
+    return networks;
+  } catch (error) {
+    elizaLogger10.error("Error fetching networks:", error);
+    throw error;
+  }
+}
+function formatNetworksContext(networks) {
+  const mainNetworks = ["eth", "bsc", "polygon_pos", "avax", "solana"];
+  const popular = networks.filter((n) => mainNetworks.includes(n.id)).map((n) => `${n.attributes.name} - ID: ${n.id}`);
+  return `
+Available blockchain networks:
+
+Major networks:
+${popular.map((n) => `- ${n}`).join("\n")}
+
+Total available networks: ${networks.length}
+
+You can use these network IDs when querying network-specific data.
+`.trim();
+}
+var networksProvider = {
+  // eslint-disable-next-line
+  get: async (runtime, message, state) => {
+    try {
+      const networks = await getNetworks(runtime);
+      return formatNetworksContext(networks);
+    } catch (error) {
+      elizaLogger10.error("Networks provider error:", error);
+      return "Blockchain networks list is temporarily unavailable. Please try again later.";
+    }
+  }
+};
+async function getNetworksData(runtime) {
+  return getNetworks(runtime);
+}
+
+// src/actions/getNetworkTrendingPools.ts
+var GetNetworkTrendingPoolsSchema = z.object({
+  networkId: z.string(),
+  limit: z.number().min(1).max(100).default(10)
+});
+var isGetNetworkTrendingPoolsContent = (obj) => {
+  return GetNetworkTrendingPoolsSchema.safeParse(obj).success;
+};
+var getNetworkTrendingPools_default = {
+  name: "GET_NETWORK_TRENDING_POOLS",
+  similes: [
+    "NETWORK_TRENDING_POOLS",
+    "CHAIN_HOT_POOLS",
+    "BLOCKCHAIN_POPULAR_POOLS"
+  ],
+  validate: async (runtime, _message) => {
+    await validateCoingeckoConfig(runtime);
+    return true;
+  },
+  description: "Get list of trending pools for a specific network from CoinGecko's onchain data",
+  handler: async (runtime, message, state, _options, callback) => {
+    elizaLogger11.log(
+      "Starting CoinGecko GET_NETWORK_TRENDING_POOLS handler..."
+    );
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
+    } else {
+      currentState = await runtime.updateRecentMessageState(currentState);
+    }
+    try {
+      elizaLogger11.log("Composing network trending pools context...");
+      const trendingContext = composeContext8({
+        state: currentState,
+        template: getNetworkTrendingPoolsTemplate
+      });
+      const result = await generateObject8({
+        runtime,
+        context: trendingContext,
+        modelClass: ModelClass8.LARGE,
+        schema: GetNetworkTrendingPoolsSchema
+      });
+      if (!isGetNetworkTrendingPoolsContent(result.object)) {
+        elizaLogger11.error(
+          "Invalid network trending pools request format"
+        );
+        return false;
+      }
+      const networks = await getNetworksData(runtime);
+      const network = networks.find((n) => {
+        const searchTerm = result.object.networkId.toLowerCase();
+        return n.id.toLowerCase() === searchTerm || n.attributes.name.toLowerCase().includes(searchTerm) || n.attributes.coingecko_asset_platform_id.toLowerCase() === searchTerm;
+      });
+      if (!network) {
+        throw new Error(
+          `Network ${result.object.networkId} not found in available networks`
+        );
+      }
+      const config = await validateCoingeckoConfig(runtime);
+      const { baseUrl, apiKey, headerKey } = getApiConfig(config);
+      elizaLogger11.log(
+        `Fetching trending pools data for network: ${network.id}`
+      );
+      const response = await axios11.get(
+        `${baseUrl}/onchain/networks/${network.id}/trending_pools?include=base_token,dex`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
+      if (!response.data) {
+        throw new Error("No data received from CoinGecko API");
+      }
+      const formattedData = response.data.data.slice(0, result.object.limit).map((pool) => ({
+        name: pool.attributes.name,
+        marketCap: Number(
+          pool.attributes.market_cap_usd
+        ).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD"
+        }),
+        fdv: Number(pool.attributes.fdv_usd).toLocaleString(
+          "en-US",
+          {
+            style: "currency",
+            currency: "USD"
+          }
+        ),
+        reserveUSD: Number(
+          pool.attributes.reserve_in_usd
+        ).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD"
+        }),
+        createdAt: new Date(
+          pool.attributes.pool_created_at
+        ).toLocaleDateString()
+      }));
+      const responseText = [
+        `Trending Pools Overview for ${network.attributes.name}:`,
+        "",
+        ...formattedData.map(
+          (pool, index) => [
+            `${index + 1}. ${pool.name}`,
+            `   Market Cap: ${pool.marketCap}`,
+            `   FDV: ${pool.fdv}`,
+            `   Reserve: ${pool.reserveUSD}`,
+            `   Created: ${pool.createdAt}`,
+            ""
+          ].join("\n")
+        )
+      ].join("\n");
+      elizaLogger11.success(
+        "Network trending pools data retrieved successfully!"
+      );
+      if (callback) {
+        callback({
+          text: responseText,
+          content: {
+            networkId: network.id,
+            networkName: network.attributes.name,
+            trendingPools: formattedData,
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
+        });
+      }
+      return true;
+    } catch (error) {
+      elizaLogger11.error(
+        "Error in GET_NETWORK_TRENDING_POOLS handler:",
+        error
+      );
+      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending pools data: ${error.message}`;
+      if (callback) {
+        callback({
+          text: errorMessage,
+          content: {
+            error: error.message,
+            statusCode: error.response?.status
+          }
+        });
+      }
+      return false;
+    }
+  },
+  examples: [
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "Show me trending liquidity pools on Solana"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll check the trending Solana liquidity pools for you.",
+          action: "GET_NETWORK_TRENDING_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are the trending pools on SOLANA:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025"
+        }
+      }
+    ],
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "What are the top 5 hottest pools on Ethereum?"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll fetch the top 5 hottest pools on Ethereum for you.",
+          action: "GET_NETWORK_TRENDING_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are the top 5 trending pools on ETHEREUM:\n1. PEPE / WETH\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
+    ],
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "List all BSC pools with highest volume"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll get all the trending pools on BSC for you.",
+          action: "GET_NETWORK_TRENDING_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are all trending pools on BSC:\n1. CAKE / WBNB\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
+    ]
+  ]
+};
+
+// src/actions/getNetworkNewPools.ts
+import {
+  composeContext as composeContext9,
+  elizaLogger as elizaLogger12,
+  generateObject as generateObject9,
+  ModelClass as ModelClass9
+} from "@elizaos/core";
+import axios12 from "axios";
+
+// src/templates/networkNewPools.ts
+var getNetworkNewPoolsTemplate = `Determine if this is a network-specific new pools request. If it is one of the specified situations, extract the network ID and limit:
+
+Situation 1: "Get network new pools"
+- Message contains: network name AND phrases about new/recent/latest pools
+- Example: "Show new pools on Ethereum" or "What are the latest pools on BSC?"
+- Action: Extract network ID and use default limit
+
+Situation 2: "Get specific number of new pools"
+- Message contains: number AND network name AND new/recent/latest pools reference
+- Example: "Show 5 newest pools on Polygon" or "Get 20 latest pools on Avalanche"
+- Action: Extract network ID and specific limit
+
+Situation 3: "Get all new pools"
+- Message contains: "all" AND network name AND new/recent/latest pools reference
+- Example: "Show all new pools on BSC" or "List all recent pools on Ethereum"
+- Action: Extract network ID and set maximum limit
+
+Network ID mappings:
+- "solana", "sol" => "solana"
+- "ethereum", "eth" => "eth"
+- "binance smart chain", "bsc", "bnb chain" => "bsc"
+- "polygon", "matic" => "polygon_pos"
+- "avalanche", "avax" => "avax"
+
+For all situations, respond with a JSON object in the format:
+\`\`\`json
+{
+    "networkId": string,
+    "limit": number
+}
+\`\`\`
+
+Previous conversation for context:
+{{conversation}}
+
+You are replying to: {{message}}
+`;
+
+// src/actions/getNetworkNewPools.ts
+var GetNetworkNewPoolsSchema = z.object({
+  networkId: z.string(),
+  limit: z.number().min(1).max(100).default(10)
+});
+var isGetNetworkNewPoolsContent = (obj) => {
+  return GetNetworkNewPoolsSchema.safeParse(obj).success;
+};
+var getNetworkNewPools_default = {
+  name: "GET_NETWORK_NEW_POOLS",
+  similes: [
+    "NETWORK_NEW_POOLS",
+    "CHAIN_NEW_POOLS",
+    "NEW_POOLS_BY_NETWORK",
+    "RECENT_POOLS",
+    "LATEST_POOLS"
+  ],
+  validate: async (runtime, _message) => {
+    await validateCoingeckoConfig(runtime);
+    return true;
+  },
+  description: "Get list of newly created pools for a specific network from CoinGecko's onchain data",
+  handler: async (runtime, message, state, _options, callback) => {
+    elizaLogger12.log("Starting CoinGecko GET_NETWORK_NEW_POOLS handler...");
+    let currentState = state;
+    if (!currentState) {
+      currentState = await runtime.composeState(message);
+    } else {
+      currentState = await runtime.updateRecentMessageState(currentState);
+    }
+    try {
+      elizaLogger12.log("Composing network new pools context...");
+      const newPoolsContext = composeContext9({
+        state: currentState,
+        template: getNetworkNewPoolsTemplate
+      });
+      const result = await generateObject9({
+        runtime,
+        context: newPoolsContext,
+        modelClass: ModelClass9.LARGE,
+        schema: GetNetworkNewPoolsSchema
+      });
+      if (!isGetNetworkNewPoolsContent(result.object)) {
+        elizaLogger12.error("Invalid network new pools request format");
+        return false;
+      }
+      const networks = await getNetworksData(runtime);
+      const networksResponse = await getNetworksData(runtime);
+      const network = networksResponse.find((n) => {
+        const searchTerm = result.object.networkId.toLowerCase();
+        return n.id.toLowerCase() === searchTerm || n.attributes.name.toLowerCase().includes(searchTerm) || n.attributes.coingecko_asset_platform_id.toLowerCase() === searchTerm;
+      });
+      if (!network) {
+        throw new Error(
+          `Network ${result.object.networkId} not found in available networks`
+        );
+      }
+      const config = await validateCoingeckoConfig(runtime);
+      const { baseUrl, apiKey, headerKey } = getApiConfig(config);
+      elizaLogger12.log(
+        `Fetching new pools data for network: ${network.id}`
+      );
+      const response = await axios12.get(
+        `${baseUrl}/onchain/networks/${network.id}/new_pools?include=base_token,dex`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
+      if (!response.data) {
+        throw new Error("No data received from CoinGecko API");
+      }
+      const formattedData = response.data.data.slice(0, result.object.limit).map((pool) => ({
+        name: pool.attributes.name,
+        marketCap: Number(
+          pool.attributes.market_cap_usd
+        ).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD"
+        }),
+        fdv: Number(pool.attributes.fdv_usd).toLocaleString(
+          "en-US",
+          {
+            style: "currency",
+            currency: "USD"
+          }
+        ),
+        reserveUSD: Number(
+          pool.attributes.reserve_in_usd
+        ).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD"
+        }),
+        createdAt: new Date(
+          pool.attributes.pool_created_at
+        ).toLocaleDateString()
+      }));
+      const responseText = [
+        `New Pools Overview for ${network.attributes.name}:`,
+        "",
+        ...formattedData.map(
+          (pool, index) => [
+            `${index + 1}. ${pool.name}`,
+            `   Market Cap: ${pool.marketCap}`,
+            `   FDV: ${pool.fdv}`,
+            `   Reserve: ${pool.reserveUSD}`,
+            `   Created: ${pool.createdAt}`,
+            ""
+          ].join("\n")
+        )
+      ].join("\n");
+      elizaLogger12.success(
+        "Network new pools data retrieved successfully!"
+      );
+      if (callback) {
+        callback({
+          text: responseText,
+          content: {
+            networkId: network.id,
+            networkName: network.attributes.name,
+            newPools: formattedData,
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
+        });
+      }
+      return true;
+    } catch (error) {
+      elizaLogger12.error("Error in GET_NETWORK_NEW_POOLS handler:", error);
+      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching new pools data: ${error.message}`;
+      if (callback) {
+        callback({
+          text: errorMessage,
+          content: {
+            error: error.message,
+            statusCode: error.response?.status
+          }
+        });
+      }
+      return false;
+    }
+  },
+  examples: [
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "Show me new liquidity pools on Ethereum"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll check the new Ethereum liquidity pools for you.",
+          action: "GET_NETWORK_NEW_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are the new pools on ETHEREUM:\n1. PEPE / WETH\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. SUSHI / WETH\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025"
+        }
+      }
+    ],
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "What are the 5 latest pools on BSC?"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll fetch the 5 latest pools on BSC for you.",
+          action: "GET_NETWORK_NEW_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are the 5 newest pools on BSC:\n1. CAKE / WBNB\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
+    ],
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "List all recent pools on Polygon"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "I'll get all the recently added pools on Polygon for you.",
+          action: "GET_NETWORK_NEW_POOLS"
+        }
+      },
+      {
+        user: "{{agent}}",
+        content: {
+          text: "Here are all new pools on POLYGON:\n1. MATIC / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
+    ]
+  ]
+};
+
 // src/index.ts
 var coingeckoPlugin = {
   name: "coingecko",
   description: "CoinGecko Plugin for Eliza",
-  actions: [getPrice_default, getTrending_default, getMarkets_default, getTopGainersLosers_default],
+  actions: [
+    getPrice_default,
+    getPricePerAddress_default,
+    getTrending_default,
+    getTrendingPools_default,
+    getMarkets_default,
+    getTopGainersLosers_default,
+    getNewlyListed_default,
+    getNetworkTrendingPools_default,
+    getNetworkNewPools_default
+  ],
   evaluators: [],
-  providers: [categoriesProvider, coinsProvider]
+  providers: [categoriesProvider, coinsProvider, networksProvider]
 };
 var index_default = coingeckoPlugin;
 export {
