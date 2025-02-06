@@ -1,5 +1,9 @@
-import { Plugin } from '@elizaos/core';
-
-declare const coingeckoPlugin: Plugin;
+declare const coingeckoPlugin: {
+    name: string;
+    description: string;
+    actions: any[];
+    evaluators: any[];
+    providers: any[];
+};
 
 export { coingeckoPlugin, coingeckoPlugin as default };

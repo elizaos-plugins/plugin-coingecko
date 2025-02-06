@@ -1,4 +1,3 @@
-import type { Plugin } from "@elizaos/core";
 import getMarkets from "./actions/getMarkets";
 import getPrice from "./actions/getPrice";
 import getPricePerAddress from "./actions/getPricePerAddress";
@@ -12,7 +11,7 @@ import { categoriesProvider } from "./providers/categoriesProvider";
 import { coinsProvider } from "./providers/coinsProvider";
 import { networksProvider } from "./providers/networkProvider";
 
-export const coingeckoPlugin: Plugin = {
+export const coingeckoPlugin = {
     name: "coingecko",
     description: "CoinGecko Plugin for Eliza",
     actions: [
