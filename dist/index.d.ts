@@ -1,4 +1,4 @@
-import { Plugin } from "@elizaos/core";
+import { Plugin } from '@elizaos/core';
 
 declare const coingeckoPlugin: Plugin;
 

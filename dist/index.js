@@ -1,12 +1,18 @@
 // src/actions/getMarkets.ts
-import { composeContext, elizaLogger as elizaLogger2, generateObject, ModelClass } from "@elizaos/core";
+import {
+  composeContext,
+  elizaLogger as elizaLogger2,
+  generateObject,
+  ModelClass
+} from "@elizaos/core";
 import axios2 from "axios";
 
 // ../../node_modules/zod/lib/index.mjs
 var util;
-(function (util2) {
+(function(util2) {
   util2.assertEqual = (val) => val;
-  function assertIs(_arg) {}
+  function assertIs(_arg) {
+  }
   util2.assertIs = assertIs;
   function assertNever(_x) {
     throw new Error();
@@ -28,31 +34,29 @@ var util;
     return util2.objectValues(filtered);
   };
   util2.objectValues = (obj) => {
-    return util2.objectKeys(obj).map(function (e) {
+    return util2.objectKeys(obj).map(function(e) {
       return obj[e];
     });
   };
-  util2.objectKeys =
-    typeof Object.keys === "function"
-      ? (obj) => Object.keys(obj)
-      : (object) => {
-          const keys = [];
-          for (const key in object) {
-            if (Object.prototype.hasOwnProperty.call(object, key)) {
-              keys.push(key);
-            }
-          }
-          return keys;
-        };
+  util2.objectKeys = typeof Object.keys === "function" ? (obj) => Object.keys(obj) : (object) => {
+    const keys = [];
+    for (const key in object) {
+      if (Object.prototype.hasOwnProperty.call(object, key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  };
   util2.find = (arr, checker) => {
     for (const item of arr) {
-      if (checker(item)) return item;
+      if (checker(item))
+        return item;
     }
     return void 0;
   };
   util2.isInteger = typeof Number.isInteger === "function" ? (val) => Number.isInteger(val) : (val) => typeof val === "number" && isFinite(val) && Math.floor(val) === val;
   function joinValues(array, separator = " | ") {
-    return array.map((val) => (typeof val === "string" ? `'${val}'` : val)).join(separator);
+    return array.map((val) => typeof val === "string" ? `'${val}'` : val).join(separator);
   }
   util2.joinValues = joinValues;
   util2.jsonStringifyReplacer = (_, value) => {
@@ -63,16 +67,37 @@ var util;
   };
 })(util || (util = {}));
 var objectUtil;
-(function (objectUtil2) {
+(function(objectUtil2) {
   objectUtil2.mergeShapes = (first, second) => {
     return {
       ...first,
-      ...second,
+      ...second
       // second overwrites first
     };
   };
 })(objectUtil || (objectUtil = {}));
-var ZodParsedType = util.arrayToEnum(["string", "nan", "number", "integer", "float", "boolean", "date", "bigint", "symbol", "function", "undefined", "null", "array", "object", "unknown", "promise", "void", "never", "map", "set"]);
+var ZodParsedType = util.arrayToEnum([
+  "string",
+  "nan",
+  "number",
+  "integer",
+  "float",
+  "boolean",
+  "date",
+  "bigint",
+  "symbol",
+  "function",
+  "undefined",
+  "null",
+  "array",
+  "object",
+  "unknown",
+  "promise",
+  "void",
+  "never",
+  "map",
+  "set"
+]);
 var getParsedType = (data) => {
   const t = typeof data;
   switch (t) {
@@ -114,12 +139,32 @@ var getParsedType = (data) => {
       return ZodParsedType.unknown;
   }
 };
-var ZodIssueCode = util.arrayToEnum(["invalid_type", "invalid_literal", "custom", "invalid_union", "invalid_union_discriminator", "invalid_enum_value", "unrecognized_keys", "invalid_arguments", "invalid_return_type", "invalid_date", "invalid_string", "too_small", "too_big", "invalid_intersection_types", "not_multiple_of", "not_finite"]);
+var ZodIssueCode = util.arrayToEnum([
+  "invalid_type",
+  "invalid_literal",
+  "custom",
+  "invalid_union",
+  "invalid_union_discriminator",
+  "invalid_enum_value",
+  "unrecognized_keys",
+  "invalid_arguments",
+  "invalid_return_type",
+  "invalid_date",
+  "invalid_string",
+  "too_small",
+  "too_big",
+  "invalid_intersection_types",
+  "not_multiple_of",
+  "not_finite"
+]);
 var quotelessJson = (obj) => {
   const json = JSON.stringify(obj, null, 2);
   return json.replace(/"([^"]+)":/g, "$1:");
 };
 var ZodError = class _ZodError extends Error {
+  get errors() {
+    return this.issues;
+  }
   constructor(issues) {
     super();
     this.issues = [];
@@ -138,15 +183,10 @@ var ZodError = class _ZodError extends Error {
     this.name = "ZodError";
     this.issues = issues;
   }
-  get errors() {
-    return this.issues;
-  }
   format(_mapper) {
-    const mapper =
-      _mapper ||
-      function (issue) {
-        return issue.message;
-      };
+    const mapper = _mapper || function(issue) {
+      return issue.message;
+    };
     const fieldErrors = { _errors: [] };
     const processError = (error) => {
       for (const issue of error.issues) {
@@ -269,19 +309,30 @@ var errorMap = (issue, _ctx) => {
       }
       break;
     case ZodIssueCode.too_small:
-      if (issue.type === "array") message = `Array must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `more than`} ${issue.minimum} element(s)`;
-      else if (issue.type === "string") message = `String must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `over`} ${issue.minimum} character(s)`;
-      else if (issue.type === "number") message = `Number must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${issue.minimum}`;
-      else if (issue.type === "date") message = `Date must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${new Date(Number(issue.minimum))}`;
-      else message = "Invalid input";
+      if (issue.type === "array")
+        message = `Array must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `more than`} ${issue.minimum} element(s)`;
+      else if (issue.type === "string")
+        message = `String must contain ${issue.exact ? "exactly" : issue.inclusive ? `at least` : `over`} ${issue.minimum} character(s)`;
+      else if (issue.type === "number")
+        message = `Number must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${issue.minimum}`;
+      else if (issue.type === "date")
+        message = `Date must be ${issue.exact ? `exactly equal to ` : issue.inclusive ? `greater than or equal to ` : `greater than `}${new Date(Number(issue.minimum))}`;
+      else
+        message = "Invalid input";
       break;
     case ZodIssueCode.too_big:
-      if (issue.type === "array") message = `Array must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `less than`} ${issue.maximum} element(s)`;
-      else if (issue.type === "string") message = `String must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `under`} ${issue.maximum} character(s)`;
-      else if (issue.type === "number") message = `Number must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
-      else if (issue.type === "bigint") message = `BigInt must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
-      else if (issue.type === "date") message = `Date must be ${issue.exact ? `exactly` : issue.inclusive ? `smaller than or equal to` : `smaller than`} ${new Date(Number(issue.maximum))}`;
-      else message = "Invalid input";
+      if (issue.type === "array")
+        message = `Array must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `less than`} ${issue.maximum} element(s)`;
+      else if (issue.type === "string")
+        message = `String must contain ${issue.exact ? `exactly` : issue.inclusive ? `at most` : `under`} ${issue.maximum} character(s)`;
+      else if (issue.type === "number")
+        message = `Number must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
+      else if (issue.type === "bigint")
+        message = `BigInt must be ${issue.exact ? `exactly` : issue.inclusive ? `less than or equal to` : `less than`} ${issue.maximum}`;
+      else if (issue.type === "date")
+        message = `Date must be ${issue.exact ? `exactly` : issue.inclusive ? `smaller than or equal to` : `smaller than`} ${new Date(Number(issue.maximum))}`;
+      else
+        message = "Invalid input";
       break;
     case ZodIssueCode.custom:
       message = `Invalid input`;
@@ -310,30 +361,27 @@ function getErrorMap() {
 }
 var makeIssue = (params) => {
   const { data, path, errorMaps, issueData } = params;
-  const fullPath = [...path, ...(issueData.path || [])];
+  const fullPath = [...path, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
-    path: fullPath,
+    path: fullPath
   };
   if (issueData.message !== void 0) {
     return {
       ...issueData,
       path: fullPath,
-      message: issueData.message,
+      message: issueData.message
     };
   }
   let errorMessage = "";
-  const maps = errorMaps
-    .filter((m) => !!m)
-    .slice()
-    .reverse();
+  const maps = errorMaps.filter((m) => !!m).slice().reverse();
   for (const map of maps) {
     errorMessage = map(fullIssue, { data, defaultError: errorMessage }).message;
   }
   return {
     ...issueData,
     path: fullPath,
-    message: errorMessage,
+    message: errorMessage
   };
 };
 var EMPTY_PATH = [];
@@ -345,11 +393,14 @@ function addIssueToContext(ctx, issueData) {
     path: ctx.path,
     errorMaps: [
       ctx.common.contextualErrorMap,
+      // contextual error map is first priority
       ctx.schemaErrorMap,
+      // then schema-bound map if available
       overrideMap,
-      overrideMap === errorMap ? void 0 : errorMap,
+      // then global override map
+      overrideMap === errorMap ? void 0 : errorMap
       // then global default map
-    ].filter((x) => !!x),
+    ].filter((x) => !!x)
   });
   ctx.common.issues.push(issue);
 }
@@ -358,16 +409,20 @@ var ParseStatus = class _ParseStatus {
     this.value = "valid";
   }
   dirty() {
-    if (this.value === "valid") this.value = "dirty";
+    if (this.value === "valid")
+      this.value = "dirty";
   }
   abort() {
-    if (this.value !== "aborted") this.value = "aborted";
+    if (this.value !== "aborted")
+      this.value = "aborted";
   }
   static mergeArray(status, results) {
     const arrayValue = [];
     for (const s of results) {
-      if (s.status === "aborted") return INVALID;
-      if (s.status === "dirty") status.dirty();
+      if (s.status === "aborted")
+        return INVALID;
+      if (s.status === "dirty")
+        status.dirty();
       arrayValue.push(s.value);
     }
     return { status: status.value, value: arrayValue };
@@ -379,7 +434,7 @@ var ParseStatus = class _ParseStatus {
       const value = await pair.value;
       syncPairs.push({
         key,
-        value,
+        value
       });
     }
     return _ParseStatus.mergeObjectSync(status, syncPairs);
@@ -388,10 +443,14 @@ var ParseStatus = class _ParseStatus {
     const finalObject = {};
     for (const pair of pairs) {
       const { key, value } = pair;
-      if (key.status === "aborted") return INVALID;
-      if (value.status === "aborted") return INVALID;
-      if (key.status === "dirty") status.dirty();
-      if (value.status === "dirty") status.dirty();
+      if (key.status === "aborted")
+        return INVALID;
+      if (value.status === "aborted")
+        return INVALID;
+      if (key.status === "dirty")
+        status.dirty();
+      if (value.status === "dirty")
+        status.dirty();
       if (key.value !== "__proto__" && (typeof value.value !== "undefined" || pair.alwaysSet)) {
         finalObject[key.value] = value.value;
       }
@@ -400,7 +459,7 @@ var ParseStatus = class _ParseStatus {
   }
 };
 var INVALID = Object.freeze({
-  status: "aborted",
+  status: "aborted"
 });
 var DIRTY = (value) => ({ status: "dirty", value });
 var OK = (value) => ({ status: "valid", value });
@@ -417,12 +476,12 @@ function __classPrivateFieldSet(receiver, state, value, kind, f) {
   if (kind === "m") throw new TypeError("Private method is not writable");
   if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return kind === "a" ? f.call(receiver, value) : f ? (f.value = value) : state.set(receiver, value), value;
+  return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
 }
 var errorUtil;
-(function (errorUtil2) {
-  errorUtil2.errToObj = (message) => (typeof message === "string" ? { message } : message || {});
-  errorUtil2.toString = (message) => (typeof message === "string" ? message : message === null || message === void 0 ? void 0 : message.message);
+(function(errorUtil2) {
+  errorUtil2.errToObj = (message) => typeof message === "string" ? { message } : message || {};
+  errorUtil2.toString = (message) => typeof message === "string" ? message : message === null || message === void 0 ? void 0 : message.message;
 })(errorUtil || (errorUtil = {}));
 var _ZodEnum_cache;
 var _ZodNativeEnum_cache;
@@ -455,21 +514,24 @@ var handleResult = (ctx, result) => {
     return {
       success: false,
       get error() {
-        if (this._error) return this._error;
+        if (this._error)
+          return this._error;
         const error = new ZodError(ctx.common.issues);
         this._error = error;
         return this._error;
-      },
+      }
     };
   }
 };
 function processCreateParams(params) {
-  if (!params) return {};
+  if (!params)
+    return {};
   const { errorMap: errorMap2, invalid_type_error, required_error, description } = params;
   if (errorMap2 && (invalid_type_error || required_error)) {
     throw new Error(`Can't use "invalid_type_error" or "required_error" in conjunction with custom error map.`);
   }
-  if (errorMap2) return { errorMap: errorMap2, description };
+  if (errorMap2)
+    return { errorMap: errorMap2, description };
   const customMap = (iss, ctx) => {
     var _a, _b;
     const { message } = params;
@@ -479,40 +541,13 @@ function processCreateParams(params) {
     if (typeof ctx.data === "undefined") {
       return { message: (_a = message !== null && message !== void 0 ? message : required_error) !== null && _a !== void 0 ? _a : ctx.defaultError };
     }
-    if (iss.code !== "invalid_type") return { message: ctx.defaultError };
+    if (iss.code !== "invalid_type")
+      return { message: ctx.defaultError };
     return { message: (_b = message !== null && message !== void 0 ? message : invalid_type_error) !== null && _b !== void 0 ? _b : ctx.defaultError };
   };
   return { errorMap: customMap, description };
 }
 var ZodType = class {
-  constructor(def) {
-    this.spa = this.safeParseAsync;
-    this._def = def;
-    this.parse = this.parse.bind(this);
-    this.safeParse = this.safeParse.bind(this);
-    this.parseAsync = this.parseAsync.bind(this);
-    this.safeParseAsync = this.safeParseAsync.bind(this);
-    this.spa = this.spa.bind(this);
-    this.refine = this.refine.bind(this);
-    this.refinement = this.refinement.bind(this);
-    this.superRefine = this.superRefine.bind(this);
-    this.optional = this.optional.bind(this);
-    this.nullable = this.nullable.bind(this);
-    this.nullish = this.nullish.bind(this);
-    this.array = this.array.bind(this);
-    this.promise = this.promise.bind(this);
-    this.or = this.or.bind(this);
-    this.and = this.and.bind(this);
-    this.transform = this.transform.bind(this);
-    this.brand = this.brand.bind(this);
-    this.default = this.default.bind(this);
-    this.catch = this.catch.bind(this);
-    this.describe = this.describe.bind(this);
-    this.pipe = this.pipe.bind(this);
-    this.readonly = this.readonly.bind(this);
-    this.isNullable = this.isNullable.bind(this);
-    this.isOptional = this.isOptional.bind(this);
-  }
   get description() {
     return this._def.description;
   }
@@ -520,16 +555,14 @@ var ZodType = class {
     return getParsedType(input.data);
   }
   _getOrReturnCtx(input, ctx) {
-    return (
-      ctx || {
-        common: input.parent.common,
-        data: input.data,
-        parsedType: getParsedType(input.data),
-        schemaErrorMap: this._def.errorMap,
-        path: input.path,
-        parent: input.parent,
-      }
-    );
+    return ctx || {
+      common: input.parent.common,
+      data: input.data,
+      parsedType: getParsedType(input.data),
+      schemaErrorMap: this._def.errorMap,
+      path: input.path,
+      parent: input.parent
+    };
   }
   _processInputParams(input) {
     return {
@@ -540,8 +573,8 @@ var ZodType = class {
         parsedType: getParsedType(input.data),
         schemaErrorMap: this._def.errorMap,
         path: input.path,
-        parent: input.parent,
-      },
+        parent: input.parent
+      }
     };
   }
   _parseSync(input) {
@@ -557,7 +590,8 @@ var ZodType = class {
   }
   parse(data, params) {
     const result = this.safeParse(data, params);
-    if (result.success) return result.data;
+    if (result.success)
+      return result.data;
     throw result.error;
   }
   safeParse(data, params) {
@@ -566,20 +600,58 @@ var ZodType = class {
       common: {
         issues: [],
         async: (_a = params === null || params === void 0 ? void 0 : params.async) !== null && _a !== void 0 ? _a : false,
-        contextualErrorMap: params === null || params === void 0 ? void 0 : params.errorMap,
+        contextualErrorMap: params === null || params === void 0 ? void 0 : params.errorMap
       },
       path: (params === null || params === void 0 ? void 0 : params.path) || [],
       schemaErrorMap: this._def.errorMap,
       parent: null,
       data,
-      parsedType: getParsedType(data),
+      parsedType: getParsedType(data)
     };
     const result = this._parseSync({ data, path: ctx.path, parent: ctx });
     return handleResult(ctx, result);
   }
+  "~validate"(data) {
+    var _a, _b;
+    const ctx = {
+      common: {
+        issues: [],
+        async: !!this["~standard"].async
+      },
+      path: [],
+      schemaErrorMap: this._def.errorMap,
+      parent: null,
+      data,
+      parsedType: getParsedType(data)
+    };
+    if (!this["~standard"].async) {
+      try {
+        const result = this._parseSync({ data, path: [], parent: ctx });
+        return isValid(result) ? {
+          value: result.value
+        } : {
+          issues: ctx.common.issues
+        };
+      } catch (err) {
+        if ((_b = (_a = err === null || err === void 0 ? void 0 : err.message) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === null || _b === void 0 ? void 0 : _b.includes("encountered")) {
+          this["~standard"].async = true;
+        }
+        ctx.common = {
+          issues: [],
+          async: true
+        };
+      }
+    }
+    return this._parseAsync({ data, path: [], parent: ctx }).then((result) => isValid(result) ? {
+      value: result.value
+    } : {
+      issues: ctx.common.issues
+    });
+  }
   async parseAsync(data, params) {
     const result = await this.safeParseAsync(data, params);
-    if (result.success) return result.data;
+    if (result.success)
+      return result.data;
     throw result.error;
   }
   async safeParseAsync(data, params) {
@@ -587,13 +659,13 @@ var ZodType = class {
       common: {
         issues: [],
         contextualErrorMap: params === null || params === void 0 ? void 0 : params.errorMap,
-        async: true,
+        async: true
       },
       path: (params === null || params === void 0 ? void 0 : params.path) || [],
       schemaErrorMap: this._def.errorMap,
       parent: null,
       data,
-      parsedType: getParsedType(data),
+      parsedType: getParsedType(data)
     };
     const maybeAsyncResult = this._parse({ data, path: ctx.path, parent: ctx });
     const result = await (isAsync(maybeAsyncResult) ? maybeAsyncResult : Promise.resolve(maybeAsyncResult));
@@ -611,11 +683,10 @@ var ZodType = class {
     };
     return this._refinement((val, ctx) => {
       const result = check(val);
-      const setError = () =>
-        ctx.addIssue({
-          code: ZodIssueCode.custom,
-          ...getIssueProperties(val),
-        });
+      const setError = () => ctx.addIssue({
+        code: ZodIssueCode.custom,
+        ...getIssueProperties(val)
+      });
       if (typeof Promise !== "undefined" && result instanceof Promise) {
         return result.then((data) => {
           if (!data) {
@@ -648,11 +719,44 @@ var ZodType = class {
     return new ZodEffects({
       schema: this,
       typeName: ZodFirstPartyTypeKind.ZodEffects,
-      effect: { type: "refinement", refinement },
+      effect: { type: "refinement", refinement }
     });
   }
   superRefine(refinement) {
     return this._refinement(refinement);
+  }
+  constructor(def) {
+    this.spa = this.safeParseAsync;
+    this._def = def;
+    this.parse = this.parse.bind(this);
+    this.safeParse = this.safeParse.bind(this);
+    this.parseAsync = this.parseAsync.bind(this);
+    this.safeParseAsync = this.safeParseAsync.bind(this);
+    this.spa = this.spa.bind(this);
+    this.refine = this.refine.bind(this);
+    this.refinement = this.refinement.bind(this);
+    this.superRefine = this.superRefine.bind(this);
+    this.optional = this.optional.bind(this);
+    this.nullable = this.nullable.bind(this);
+    this.nullish = this.nullish.bind(this);
+    this.array = this.array.bind(this);
+    this.promise = this.promise.bind(this);
+    this.or = this.or.bind(this);
+    this.and = this.and.bind(this);
+    this.transform = this.transform.bind(this);
+    this.brand = this.brand.bind(this);
+    this.default = this.default.bind(this);
+    this.catch = this.catch.bind(this);
+    this.describe = this.describe.bind(this);
+    this.pipe = this.pipe.bind(this);
+    this.readonly = this.readonly.bind(this);
+    this.isNullable = this.isNullable.bind(this);
+    this.isOptional = this.isOptional.bind(this);
+    this["~standard"] = {
+      version: 1,
+      vendor: "zod",
+      validate: (data) => this["~validate"](data)
+    };
   }
   optional() {
     return ZodOptional.create(this, this._def);
@@ -664,7 +768,7 @@ var ZodType = class {
     return this.nullable().optional();
   }
   array() {
-    return ZodArray.create(this, this._def);
+    return ZodArray.create(this);
   }
   promise() {
     return ZodPromise.create(this, this._def);
@@ -680,7 +784,7 @@ var ZodType = class {
       ...processCreateParams(this._def),
       schema: this,
       typeName: ZodFirstPartyTypeKind.ZodEffects,
-      effect: { type: "transform", transform },
+      effect: { type: "transform", transform }
     });
   }
   default(def) {
@@ -689,14 +793,14 @@ var ZodType = class {
       ...processCreateParams(this._def),
       innerType: this,
       defaultValue: defaultValueFunc,
-      typeName: ZodFirstPartyTypeKind.ZodDefault,
+      typeName: ZodFirstPartyTypeKind.ZodDefault
     });
   }
   brand() {
     return new ZodBranded({
       typeName: ZodFirstPartyTypeKind.ZodBranded,
       type: this,
-      ...processCreateParams(this._def),
+      ...processCreateParams(this._def)
     });
   }
   catch(def) {
@@ -705,14 +809,14 @@ var ZodType = class {
       ...processCreateParams(this._def),
       innerType: this,
       catchValue: catchValueFunc,
-      typeName: ZodFirstPartyTypeKind.ZodCatch,
+      typeName: ZodFirstPartyTypeKind.ZodCatch
     });
   }
   describe(description) {
     const This = this.constructor;
     return new This({
       ...this._def,
-      description,
+      description
     });
   }
   pipe(target) {
@@ -730,16 +834,20 @@ var ZodType = class {
 };
 var cuidRegex = /^c[^\s-]{8,}$/i;
 var cuid2Regex = /^[0-9a-z]+$/;
-var ulidRegex = /^[0-9A-HJKMNP-TV-Z]{26}$/;
+var ulidRegex = /^[0-9A-HJKMNP-TV-Z]{26}$/i;
 var uuidRegex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/i;
 var nanoidRegex = /^[a-z0-9_-]{21}$/i;
+var jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/;
 var durationRegex = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/;
 var emailRegex = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i;
 var _emojiRegex = `^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$`;
 var emojiRegex;
 var ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])$/;
-var ipv6Regex = /^(([a-f0-9]{1,4}:){7}|::([a-f0-9]{1,4}:){0,6}|([a-f0-9]{1,4}:){1}:([a-f0-9]{1,4}:){0,5}|([a-f0-9]{1,4}:){2}:([a-f0-9]{1,4}:){0,4}|([a-f0-9]{1,4}:){3}:([a-f0-9]{1,4}:){0,3}|([a-f0-9]{1,4}:){4}:([a-f0-9]{1,4}:){0,2}|([a-f0-9]{1,4}:){5}:([a-f0-9]{1,4}:){0,1})([a-f0-9]{1,4}|(((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2}))\.){3}((25[0-5])|(2[0-4][0-9])|(1[0-9]{2})|([0-9]{1,2})))$/;
+var ipv4CidrRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\/(3[0-2]|[12]?[0-9])$/;
+var ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+var ipv6CidrRegex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$/;
 var base64Regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+var base64urlRegex = /^([0-9a-zA-Z-_]{4})*(([0-9a-zA-Z-_]{2}(==)?)|([0-9a-zA-Z-_]{3}(=)?))?$/;
 var dateRegexSource = `((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))`;
 var dateRegex = new RegExp(`^${dateRegexSource}$`);
 function timeRegexSource(args) {
@@ -758,7 +866,8 @@ function datetimeRegex(args) {
   let regex = `${dateRegexSource}T${timeRegexSource(args)}`;
   const opts = [];
   opts.push(args.local ? `Z?` : `Z`);
-  if (args.offset) opts.push(`([+-]\\d{2}:?\\d{2})`);
+  if (args.offset)
+    opts.push(`([+-]\\d{2}:?\\d{2})`);
   regex = `${regex}(${opts.join("|")})`;
   return new RegExp(`^${regex}$`);
 }
@@ -767,6 +876,33 @@ function isValidIP(ip, version) {
     return true;
   }
   if ((version === "v6" || !version) && ipv6Regex.test(ip)) {
+    return true;
+  }
+  return false;
+}
+function isValidJWT(jwt, alg) {
+  if (!jwtRegex.test(jwt))
+    return false;
+  try {
+    const [header] = jwt.split(".");
+    const base64 = header.replace(/-/g, "+").replace(/_/g, "/").padEnd(header.length + (4 - header.length % 4) % 4, "=");
+    const decoded = JSON.parse(atob(base64));
+    if (typeof decoded !== "object" || decoded === null)
+      return false;
+    if (!decoded.typ || !decoded.alg)
+      return false;
+    if (alg && decoded.alg !== alg)
+      return false;
+    return true;
+  } catch (_a) {
+    return false;
+  }
+}
+function isValidCidr(ip, version) {
+  if ((version === "v4" || !version) && ipv4CidrRegex.test(ip)) {
+    return true;
+  }
+  if ((version === "v6" || !version) && ipv6CidrRegex.test(ip)) {
     return true;
   }
   return false;
@@ -782,7 +918,7 @@ var ZodString = class _ZodString extends ZodType {
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.string,
-        received: ctx2.parsedType,
+        received: ctx2.parsedType
       });
       return INVALID;
     }
@@ -798,7 +934,7 @@ var ZodString = class _ZodString extends ZodType {
             type: "string",
             inclusive: true,
             exact: false,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -811,7 +947,7 @@ var ZodString = class _ZodString extends ZodType {
             type: "string",
             inclusive: true,
             exact: false,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -827,7 +963,7 @@ var ZodString = class _ZodString extends ZodType {
               type: "string",
               inclusive: true,
               exact: true,
-              message: check.message,
+              message: check.message
             });
           } else if (tooSmall) {
             addIssueToContext(ctx, {
@@ -836,7 +972,7 @@ var ZodString = class _ZodString extends ZodType {
               type: "string",
               inclusive: true,
               exact: true,
-              message: check.message,
+              message: check.message
             });
           }
           status.dirty();
@@ -847,7 +983,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "email",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -860,7 +996,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "emoji",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -870,7 +1006,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "uuid",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -880,7 +1016,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "nanoid",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -890,7 +1026,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "cuid",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -900,7 +1036,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "cuid2",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -910,7 +1046,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "ulid",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -922,7 +1058,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "url",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -934,7 +1070,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "regex",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -946,7 +1082,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: { includes: check.value, position: check.position },
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -960,7 +1096,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: { startsWith: check.value },
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -970,7 +1106,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: { endsWith: check.value },
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -981,7 +1117,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: "datetime",
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -992,7 +1128,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: "date",
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1003,7 +1139,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             code: ZodIssueCode.invalid_string,
             validation: "time",
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1013,7 +1149,7 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "duration",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1023,7 +1159,27 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "ip",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "jwt") {
+        if (!isValidJWT(input.data, check.alg)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "jwt",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "cidr") {
+        if (!isValidCidr(input.data, check.version)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "cidr",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
           });
           status.dirty();
         }
@@ -1033,7 +1189,17 @@ var ZodString = class _ZodString extends ZodType {
           addIssueToContext(ctx, {
             validation: "base64",
             code: ZodIssueCode.invalid_string,
-            message: check.message,
+            message: check.message
+          });
+          status.dirty();
+        }
+      } else if (check.kind === "base64url") {
+        if (!base64urlRegex.test(input.data)) {
+          ctx = this._getOrReturnCtx(input, ctx);
+          addIssueToContext(ctx, {
+            validation: "base64url",
+            code: ZodIssueCode.invalid_string,
+            message: check.message
           });
           status.dirty();
         }
@@ -1047,13 +1213,13 @@ var ZodString = class _ZodString extends ZodType {
     return this.refinement((data) => regex.test(data), {
       validation,
       code: ZodIssueCode.invalid_string,
-      ...errorUtil.errToObj(message),
+      ...errorUtil.errToObj(message)
     });
   }
   _addCheck(check) {
     return new _ZodString({
       ...this._def,
-      checks: [...this._def.checks, check],
+      checks: [...this._def.checks, check]
     });
   }
   email(message) {
@@ -1083,8 +1249,20 @@ var ZodString = class _ZodString extends ZodType {
   base64(message) {
     return this._addCheck({ kind: "base64", ...errorUtil.errToObj(message) });
   }
+  base64url(message) {
+    return this._addCheck({
+      kind: "base64url",
+      ...errorUtil.errToObj(message)
+    });
+  }
+  jwt(options) {
+    return this._addCheck({ kind: "jwt", ...errorUtil.errToObj(options) });
+  }
   ip(options) {
     return this._addCheck({ kind: "ip", ...errorUtil.errToObj(options) });
+  }
+  cidr(options) {
+    return this._addCheck({ kind: "cidr", ...errorUtil.errToObj(options) });
   }
   datetime(options) {
     var _a, _b;
@@ -1094,7 +1272,7 @@ var ZodString = class _ZodString extends ZodType {
         precision: null,
         offset: false,
         local: false,
-        message: options,
+        message: options
       });
     }
     return this._addCheck({
@@ -1102,7 +1280,7 @@ var ZodString = class _ZodString extends ZodType {
       precision: typeof (options === null || options === void 0 ? void 0 : options.precision) === "undefined" ? null : options === null || options === void 0 ? void 0 : options.precision,
       offset: (_a = options === null || options === void 0 ? void 0 : options.offset) !== null && _a !== void 0 ? _a : false,
       local: (_b = options === null || options === void 0 ? void 0 : options.local) !== null && _b !== void 0 ? _b : false,
-      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message),
+      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
     });
   }
   date(message) {
@@ -1113,13 +1291,13 @@ var ZodString = class _ZodString extends ZodType {
       return this._addCheck({
         kind: "time",
         precision: null,
-        message: options,
+        message: options
       });
     }
     return this._addCheck({
       kind: "time",
       precision: typeof (options === null || options === void 0 ? void 0 : options.precision) === "undefined" ? null : options === null || options === void 0 ? void 0 : options.precision,
-      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message),
+      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
     });
   }
   duration(message) {
@@ -1129,7 +1307,7 @@ var ZodString = class _ZodString extends ZodType {
     return this._addCheck({
       kind: "regex",
       regex,
-      ...errorUtil.errToObj(message),
+      ...errorUtil.errToObj(message)
     });
   }
   includes(value, options) {
@@ -1137,47 +1315,46 @@ var ZodString = class _ZodString extends ZodType {
       kind: "includes",
       value,
       position: options === null || options === void 0 ? void 0 : options.position,
-      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message),
+      ...errorUtil.errToObj(options === null || options === void 0 ? void 0 : options.message)
     });
   }
   startsWith(value, message) {
     return this._addCheck({
       kind: "startsWith",
       value,
-      ...errorUtil.errToObj(message),
+      ...errorUtil.errToObj(message)
     });
   }
   endsWith(value, message) {
     return this._addCheck({
       kind: "endsWith",
       value,
-      ...errorUtil.errToObj(message),
+      ...errorUtil.errToObj(message)
     });
   }
   min(minLength, message) {
     return this._addCheck({
       kind: "min",
       value: minLength,
-      ...errorUtil.errToObj(message),
+      ...errorUtil.errToObj(message)
     });
   }
   max(maxLength, message) {
     return this._addCheck({
       kind: "max",
       value: maxLength,
-      ...errorUtil.errToObj(message),
+      ...errorUtil.errToObj(message)
     });
   }
   length(len, message) {
     return this._addCheck({
       kind: "length",
       value: len,
-      ...errorUtil.errToObj(message),
+      ...errorUtil.errToObj(message)
     });
   }
   /**
-   * @deprecated Use z.string().min(1) instead.
-   * @see {@link ZodString.min}
+   * Equivalent to `.min(1)`
    */
   nonempty(message) {
     return this.min(1, errorUtil.errToObj(message));
@@ -1185,19 +1362,19 @@ var ZodString = class _ZodString extends ZodType {
   trim() {
     return new _ZodString({
       ...this._def,
-      checks: [...this._def.checks, { kind: "trim" }],
+      checks: [...this._def.checks, { kind: "trim" }]
     });
   }
   toLowerCase() {
     return new _ZodString({
       ...this._def,
-      checks: [...this._def.checks, { kind: "toLowerCase" }],
+      checks: [...this._def.checks, { kind: "toLowerCase" }]
     });
   }
   toUpperCase() {
     return new _ZodString({
       ...this._def,
-      checks: [...this._def.checks, { kind: "toUpperCase" }],
+      checks: [...this._def.checks, { kind: "toUpperCase" }]
     });
   }
   get isDatetime() {
@@ -1239,14 +1416,21 @@ var ZodString = class _ZodString extends ZodType {
   get isIP() {
     return !!this._def.checks.find((ch) => ch.kind === "ip");
   }
+  get isCIDR() {
+    return !!this._def.checks.find((ch) => ch.kind === "cidr");
+  }
   get isBase64() {
     return !!this._def.checks.find((ch) => ch.kind === "base64");
+  }
+  get isBase64url() {
+    return !!this._def.checks.find((ch) => ch.kind === "base64url");
   }
   get minLength() {
     let min = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "min") {
-        if (min === null || ch.value > min) min = ch.value;
+        if (min === null || ch.value > min)
+          min = ch.value;
       }
     }
     return min;
@@ -1255,7 +1439,8 @@ var ZodString = class _ZodString extends ZodType {
     let max = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "max") {
-        if (max === null || ch.value < max) max = ch.value;
+        if (max === null || ch.value < max)
+          max = ch.value;
       }
     }
     return max;
@@ -1267,7 +1452,7 @@ ZodString.create = (params) => {
     checks: [],
     typeName: ZodFirstPartyTypeKind.ZodString,
     coerce: (_a = params === null || params === void 0 ? void 0 : params.coerce) !== null && _a !== void 0 ? _a : false,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 function floatSafeRemainder(val, step) {
@@ -1276,7 +1461,7 @@ function floatSafeRemainder(val, step) {
   const decCount = valDecCount > stepDecCount ? valDecCount : stepDecCount;
   const valInt = parseInt(val.toFixed(decCount).replace(".", ""));
   const stepInt = parseInt(step.toFixed(decCount).replace(".", ""));
-  return (valInt % stepInt) / Math.pow(10, decCount);
+  return valInt % stepInt / Math.pow(10, decCount);
 }
 var ZodNumber = class _ZodNumber extends ZodType {
   constructor() {
@@ -1295,7 +1480,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.number,
-        received: ctx2.parsedType,
+        received: ctx2.parsedType
       });
       return INVALID;
     }
@@ -1309,7 +1494,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
             code: ZodIssueCode.invalid_type,
             expected: "integer",
             received: "float",
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1323,7 +1508,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
             type: "number",
             inclusive: check.inclusive,
             exact: false,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1337,7 +1522,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
             type: "number",
             inclusive: check.inclusive,
             exact: false,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1347,7 +1532,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
           addIssueToContext(ctx, {
             code: ZodIssueCode.not_multiple_of,
             multipleOf: check.value,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1356,7 +1541,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
           ctx = this._getOrReturnCtx(input, ctx);
           addIssueToContext(ctx, {
             code: ZodIssueCode.not_finite,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1387,21 +1572,21 @@ var ZodNumber = class _ZodNumber extends ZodType {
           kind,
           value,
           inclusive,
-          message: errorUtil.toString(message),
-        },
-      ],
+          message: errorUtil.toString(message)
+        }
+      ]
     });
   }
   _addCheck(check) {
     return new _ZodNumber({
       ...this._def,
-      checks: [...this._def.checks, check],
+      checks: [...this._def.checks, check]
     });
   }
   int(message) {
     return this._addCheck({
       kind: "int",
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   positive(message) {
@@ -1409,7 +1594,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
       kind: "min",
       value: 0,
       inclusive: false,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   negative(message) {
@@ -1417,7 +1602,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
       kind: "max",
       value: 0,
       inclusive: false,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   nonpositive(message) {
@@ -1425,7 +1610,7 @@ var ZodNumber = class _ZodNumber extends ZodType {
       kind: "max",
       value: 0,
       inclusive: true,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   nonnegative(message) {
@@ -1433,20 +1618,20 @@ var ZodNumber = class _ZodNumber extends ZodType {
       kind: "min",
       value: 0,
       inclusive: true,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   multipleOf(value, message) {
     return this._addCheck({
       kind: "multipleOf",
       value,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   finite(message) {
     return this._addCheck({
       kind: "finite",
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   safe(message) {
@@ -1454,19 +1639,20 @@ var ZodNumber = class _ZodNumber extends ZodType {
       kind: "min",
       inclusive: true,
       value: Number.MIN_SAFE_INTEGER,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     })._addCheck({
       kind: "max",
       inclusive: true,
       value: Number.MAX_SAFE_INTEGER,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   get minValue() {
     let min = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "min") {
-        if (min === null || ch.value > min) min = ch.value;
+        if (min === null || ch.value > min)
+          min = ch.value;
       }
     }
     return min;
@@ -1475,24 +1661,26 @@ var ZodNumber = class _ZodNumber extends ZodType {
     let max = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "max") {
-        if (max === null || ch.value < max) max = ch.value;
+        if (max === null || ch.value < max)
+          max = ch.value;
       }
     }
     return max;
   }
   get isInt() {
-    return !!this._def.checks.find((ch) => ch.kind === "int" || (ch.kind === "multipleOf" && util.isInteger(ch.value)));
+    return !!this._def.checks.find((ch) => ch.kind === "int" || ch.kind === "multipleOf" && util.isInteger(ch.value));
   }
   get isFinite() {
-    let max = null,
-      min = null;
+    let max = null, min = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "finite" || ch.kind === "int" || ch.kind === "multipleOf") {
         return true;
       } else if (ch.kind === "min") {
-        if (min === null || ch.value > min) min = ch.value;
+        if (min === null || ch.value > min)
+          min = ch.value;
       } else if (ch.kind === "max") {
-        if (max === null || ch.value < max) max = ch.value;
+        if (max === null || ch.value < max)
+          max = ch.value;
       }
     }
     return Number.isFinite(min) && Number.isFinite(max);
@@ -1503,7 +1691,7 @@ ZodNumber.create = (params) => {
     checks: [],
     typeName: ZodFirstPartyTypeKind.ZodNumber,
     coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodBigInt = class _ZodBigInt extends ZodType {
@@ -1514,17 +1702,15 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
   }
   _parse(input) {
     if (this._def.coerce) {
-      input.data = BigInt(input.data);
+      try {
+        input.data = BigInt(input.data);
+      } catch (_a) {
+        return this._getInvalidInput(input);
+      }
     }
     const parsedType = this._getType(input);
     if (parsedType !== ZodParsedType.bigint) {
-      const ctx2 = this._getOrReturnCtx(input);
-      addIssueToContext(ctx2, {
-        code: ZodIssueCode.invalid_type,
-        expected: ZodParsedType.bigint,
-        received: ctx2.parsedType,
-      });
-      return INVALID;
+      return this._getInvalidInput(input);
     }
     let ctx = void 0;
     const status = new ParseStatus();
@@ -1538,7 +1724,7 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
             type: "bigint",
             minimum: check.value,
             inclusive: check.inclusive,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1551,7 +1737,7 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
             type: "bigint",
             maximum: check.value,
             inclusive: check.inclusive,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1561,7 +1747,7 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
           addIssueToContext(ctx, {
             code: ZodIssueCode.not_multiple_of,
             multipleOf: check.value,
-            message: check.message,
+            message: check.message
           });
           status.dirty();
         }
@@ -1570,6 +1756,15 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
       }
     }
     return { status: status.value, value: input.data };
+  }
+  _getInvalidInput(input) {
+    const ctx = this._getOrReturnCtx(input);
+    addIssueToContext(ctx, {
+      code: ZodIssueCode.invalid_type,
+      expected: ZodParsedType.bigint,
+      received: ctx.parsedType
+    });
+    return INVALID;
   }
   gte(value, message) {
     return this.setLimit("min", value, true, errorUtil.toString(message));
@@ -1592,15 +1787,15 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
           kind,
           value,
           inclusive,
-          message: errorUtil.toString(message),
-        },
-      ],
+          message: errorUtil.toString(message)
+        }
+      ]
     });
   }
   _addCheck(check) {
     return new _ZodBigInt({
       ...this._def,
-      checks: [...this._def.checks, check],
+      checks: [...this._def.checks, check]
     });
   }
   positive(message) {
@@ -1608,7 +1803,7 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
       kind: "min",
       value: BigInt(0),
       inclusive: false,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   negative(message) {
@@ -1616,7 +1811,7 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
       kind: "max",
       value: BigInt(0),
       inclusive: false,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   nonpositive(message) {
@@ -1624,7 +1819,7 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
       kind: "max",
       value: BigInt(0),
       inclusive: true,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   nonnegative(message) {
@@ -1632,21 +1827,22 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
       kind: "min",
       value: BigInt(0),
       inclusive: true,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   multipleOf(value, message) {
     return this._addCheck({
       kind: "multipleOf",
       value,
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   get minValue() {
     let min = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "min") {
-        if (min === null || ch.value > min) min = ch.value;
+        if (min === null || ch.value > min)
+          min = ch.value;
       }
     }
     return min;
@@ -1655,7 +1851,8 @@ var ZodBigInt = class _ZodBigInt extends ZodType {
     let max = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "max") {
-        if (max === null || ch.value < max) max = ch.value;
+        if (max === null || ch.value < max)
+          max = ch.value;
       }
     }
     return max;
@@ -1667,7 +1864,7 @@ ZodBigInt.create = (params) => {
     checks: [],
     typeName: ZodFirstPartyTypeKind.ZodBigInt,
     coerce: (_a = params === null || params === void 0 ? void 0 : params.coerce) !== null && _a !== void 0 ? _a : false,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodBoolean = class extends ZodType {
@@ -1681,7 +1878,7 @@ var ZodBoolean = class extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.boolean,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -1692,7 +1889,7 @@ ZodBoolean.create = (params) => {
   return new ZodBoolean({
     typeName: ZodFirstPartyTypeKind.ZodBoolean,
     coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodDate = class _ZodDate extends ZodType {
@@ -1706,14 +1903,14 @@ var ZodDate = class _ZodDate extends ZodType {
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.date,
-        received: ctx2.parsedType,
+        received: ctx2.parsedType
       });
       return INVALID;
     }
     if (isNaN(input.data.getTime())) {
       const ctx2 = this._getOrReturnCtx(input);
       addIssueToContext(ctx2, {
-        code: ZodIssueCode.invalid_date,
+        code: ZodIssueCode.invalid_date
       });
       return INVALID;
     }
@@ -1729,7 +1926,7 @@ var ZodDate = class _ZodDate extends ZodType {
             inclusive: true,
             exact: false,
             minimum: check.value,
-            type: "date",
+            type: "date"
           });
           status.dirty();
         }
@@ -1742,7 +1939,7 @@ var ZodDate = class _ZodDate extends ZodType {
             inclusive: true,
             exact: false,
             maximum: check.value,
-            type: "date",
+            type: "date"
           });
           status.dirty();
         }
@@ -1752,34 +1949,35 @@ var ZodDate = class _ZodDate extends ZodType {
     }
     return {
       status: status.value,
-      value: new Date(input.data.getTime()),
+      value: new Date(input.data.getTime())
     };
   }
   _addCheck(check) {
     return new _ZodDate({
       ...this._def,
-      checks: [...this._def.checks, check],
+      checks: [...this._def.checks, check]
     });
   }
   min(minDate, message) {
     return this._addCheck({
       kind: "min",
       value: minDate.getTime(),
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   max(maxDate, message) {
     return this._addCheck({
       kind: "max",
       value: maxDate.getTime(),
-      message: errorUtil.toString(message),
+      message: errorUtil.toString(message)
     });
   }
   get minDate() {
     let min = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "min") {
-        if (min === null || ch.value > min) min = ch.value;
+        if (min === null || ch.value > min)
+          min = ch.value;
       }
     }
     return min != null ? new Date(min) : null;
@@ -1788,7 +1986,8 @@ var ZodDate = class _ZodDate extends ZodType {
     let max = null;
     for (const ch of this._def.checks) {
       if (ch.kind === "max") {
-        if (max === null || ch.value < max) max = ch.value;
+        if (max === null || ch.value < max)
+          max = ch.value;
       }
     }
     return max != null ? new Date(max) : null;
@@ -1799,7 +1998,7 @@ ZodDate.create = (params) => {
     checks: [],
     coerce: (params === null || params === void 0 ? void 0 : params.coerce) || false,
     typeName: ZodFirstPartyTypeKind.ZodDate,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodSymbol = class extends ZodType {
@@ -1810,7 +2009,7 @@ var ZodSymbol = class extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.symbol,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -1820,7 +2019,7 @@ var ZodSymbol = class extends ZodType {
 ZodSymbol.create = (params) => {
   return new ZodSymbol({
     typeName: ZodFirstPartyTypeKind.ZodSymbol,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodUndefined = class extends ZodType {
@@ -1831,7 +2030,7 @@ var ZodUndefined = class extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.undefined,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -1841,7 +2040,7 @@ var ZodUndefined = class extends ZodType {
 ZodUndefined.create = (params) => {
   return new ZodUndefined({
     typeName: ZodFirstPartyTypeKind.ZodUndefined,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodNull = class extends ZodType {
@@ -1852,7 +2051,7 @@ var ZodNull = class extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.null,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -1862,7 +2061,7 @@ var ZodNull = class extends ZodType {
 ZodNull.create = (params) => {
   return new ZodNull({
     typeName: ZodFirstPartyTypeKind.ZodNull,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodAny = class extends ZodType {
@@ -1877,7 +2076,7 @@ var ZodAny = class extends ZodType {
 ZodAny.create = (params) => {
   return new ZodAny({
     typeName: ZodFirstPartyTypeKind.ZodAny,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodUnknown = class extends ZodType {
@@ -1892,7 +2091,7 @@ var ZodUnknown = class extends ZodType {
 ZodUnknown.create = (params) => {
   return new ZodUnknown({
     typeName: ZodFirstPartyTypeKind.ZodUnknown,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodNever = class extends ZodType {
@@ -1901,7 +2100,7 @@ var ZodNever = class extends ZodType {
     addIssueToContext(ctx, {
       code: ZodIssueCode.invalid_type,
       expected: ZodParsedType.never,
-      received: ctx.parsedType,
+      received: ctx.parsedType
     });
     return INVALID;
   }
@@ -1909,7 +2108,7 @@ var ZodNever = class extends ZodType {
 ZodNever.create = (params) => {
   return new ZodNever({
     typeName: ZodFirstPartyTypeKind.ZodNever,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodVoid = class extends ZodType {
@@ -1920,7 +2119,7 @@ var ZodVoid = class extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.void,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -1930,7 +2129,7 @@ var ZodVoid = class extends ZodType {
 ZodVoid.create = (params) => {
   return new ZodVoid({
     typeName: ZodFirstPartyTypeKind.ZodVoid,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodArray = class _ZodArray extends ZodType {
@@ -1941,7 +2140,7 @@ var ZodArray = class _ZodArray extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.array,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -1956,7 +2155,7 @@ var ZodArray = class _ZodArray extends ZodType {
           type: "array",
           inclusive: true,
           exact: true,
-          message: def.exactLength.message,
+          message: def.exactLength.message
         });
         status.dirty();
       }
@@ -1969,7 +2168,7 @@ var ZodArray = class _ZodArray extends ZodType {
           type: "array",
           inclusive: true,
           exact: false,
-          message: def.minLength.message,
+          message: def.minLength.message
         });
         status.dirty();
       }
@@ -1982,17 +2181,15 @@ var ZodArray = class _ZodArray extends ZodType {
           type: "array",
           inclusive: true,
           exact: false,
-          message: def.maxLength.message,
+          message: def.maxLength.message
         });
         status.dirty();
       }
     }
     if (ctx.common.async) {
-      return Promise.all(
-        [...ctx.data].map((item, i) => {
-          return def.type._parseAsync(new ParseInputLazyPath(ctx, item, ctx.path, i));
-        })
-      ).then((result2) => {
+      return Promise.all([...ctx.data].map((item, i) => {
+        return def.type._parseAsync(new ParseInputLazyPath(ctx, item, ctx.path, i));
+      })).then((result2) => {
         return ParseStatus.mergeArray(status, result2);
       });
     }
@@ -2007,19 +2204,19 @@ var ZodArray = class _ZodArray extends ZodType {
   min(minLength, message) {
     return new _ZodArray({
       ...this._def,
-      minLength: { value: minLength, message: errorUtil.toString(message) },
+      minLength: { value: minLength, message: errorUtil.toString(message) }
     });
   }
   max(maxLength, message) {
     return new _ZodArray({
       ...this._def,
-      maxLength: { value: maxLength, message: errorUtil.toString(message) },
+      maxLength: { value: maxLength, message: errorUtil.toString(message) }
     });
   }
   length(len, message) {
     return new _ZodArray({
       ...this._def,
-      exactLength: { value: len, message: errorUtil.toString(message) },
+      exactLength: { value: len, message: errorUtil.toString(message) }
     });
   }
   nonempty(message) {
@@ -2033,7 +2230,7 @@ ZodArray.create = (schema, params) => {
     maxLength: null,
     exactLength: null,
     typeName: ZodFirstPartyTypeKind.ZodArray,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 function deepPartialify(schema) {
@@ -2045,12 +2242,12 @@ function deepPartialify(schema) {
     }
     return new ZodObject({
       ...schema._def,
-      shape: () => newShape,
+      shape: () => newShape
     });
   } else if (schema instanceof ZodArray) {
     return new ZodArray({
       ...schema._def,
-      type: deepPartialify(schema.element),
+      type: deepPartialify(schema.element)
     });
   } else if (schema instanceof ZodOptional) {
     return ZodOptional.create(deepPartialify(schema.unwrap()));
@@ -2070,10 +2267,11 @@ var ZodObject = class _ZodObject extends ZodType {
     this.augment = this.extend;
   }
   _getCached() {
-    if (this._cached !== null) return this._cached;
+    if (this._cached !== null)
+      return this._cached;
     const shape = this._def.shape();
     const keys = util.objectKeys(shape);
-    return (this._cached = { shape, keys });
+    return this._cached = { shape, keys };
   }
   _parse(input) {
     const parsedType = this._getType(input);
@@ -2082,7 +2280,7 @@ var ZodObject = class _ZodObject extends ZodType {
       addIssueToContext(ctx2, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.object,
-        received: ctx2.parsedType,
+        received: ctx2.parsedType
       });
       return INVALID;
     }
@@ -2103,7 +2301,7 @@ var ZodObject = class _ZodObject extends ZodType {
       pairs.push({
         key: { status: "valid", value: key },
         value: keyValidator._parse(new ParseInputLazyPath(ctx, value, ctx.path, key)),
-        alwaysSet: key in ctx.data,
+        alwaysSet: key in ctx.data
       });
     }
     if (this._def.catchall instanceof ZodNever) {
@@ -2112,18 +2310,18 @@ var ZodObject = class _ZodObject extends ZodType {
         for (const key of extraKeys) {
           pairs.push({
             key: { status: "valid", value: key },
-            value: { status: "valid", value: ctx.data[key] },
+            value: { status: "valid", value: ctx.data[key] }
           });
         }
       } else if (unknownKeys === "strict") {
         if (extraKeys.length > 0) {
           addIssueToContext(ctx, {
             code: ZodIssueCode.unrecognized_keys,
-            keys: extraKeys,
+            keys: extraKeys
           });
           status.dirty();
         }
-      } else if (unknownKeys === "strip");
+      } else if (unknownKeys === "strip") ;
       else {
         throw new Error(`Internal ZodObject error: invalid unknownKeys value.`);
       }
@@ -2137,28 +2335,26 @@ var ZodObject = class _ZodObject extends ZodType {
             new ParseInputLazyPath(ctx, value, ctx.path, key)
             //, ctx.child(key), value, getParsedType(value)
           ),
-          alwaysSet: key in ctx.data,
+          alwaysSet: key in ctx.data
         });
       }
     }
     if (ctx.common.async) {
-      return Promise.resolve()
-        .then(async () => {
-          const syncPairs = [];
-          for (const pair of pairs) {
-            const key = await pair.key;
-            const value = await pair.value;
-            syncPairs.push({
-              key,
-              value,
-              alwaysSet: pair.alwaysSet,
-            });
-          }
-          return syncPairs;
-        })
-        .then((syncPairs) => {
-          return ParseStatus.mergeObjectSync(status, syncPairs);
-        });
+      return Promise.resolve().then(async () => {
+        const syncPairs = [];
+        for (const pair of pairs) {
+          const key = await pair.key;
+          const value = await pair.value;
+          syncPairs.push({
+            key,
+            value,
+            alwaysSet: pair.alwaysSet
+          });
+        }
+        return syncPairs;
+      }).then((syncPairs) => {
+        return ParseStatus.mergeObjectSync(status, syncPairs);
+      });
     } else {
       return ParseStatus.mergeObjectSync(status, pairs);
     }
@@ -2171,33 +2367,31 @@ var ZodObject = class _ZodObject extends ZodType {
     return new _ZodObject({
       ...this._def,
       unknownKeys: "strict",
-      ...(message !== void 0
-        ? {
-            errorMap: (issue, ctx) => {
-              var _a, _b, _c, _d;
-              const defaultError = (_c = (_b = (_a = this._def).errorMap) === null || _b === void 0 ? void 0 : _b.call(_a, issue, ctx).message) !== null && _c !== void 0 ? _c : ctx.defaultError;
-              if (issue.code === "unrecognized_keys")
-                return {
-                  message: (_d = errorUtil.errToObj(message).message) !== null && _d !== void 0 ? _d : defaultError,
-                };
-              return {
-                message: defaultError,
-              };
-            },
-          }
-        : {}),
+      ...message !== void 0 ? {
+        errorMap: (issue, ctx) => {
+          var _a, _b, _c, _d;
+          const defaultError = (_c = (_b = (_a = this._def).errorMap) === null || _b === void 0 ? void 0 : _b.call(_a, issue, ctx).message) !== null && _c !== void 0 ? _c : ctx.defaultError;
+          if (issue.code === "unrecognized_keys")
+            return {
+              message: (_d = errorUtil.errToObj(message).message) !== null && _d !== void 0 ? _d : defaultError
+            };
+          return {
+            message: defaultError
+          };
+        }
+      } : {}
     });
   }
   strip() {
     return new _ZodObject({
       ...this._def,
-      unknownKeys: "strip",
+      unknownKeys: "strip"
     });
   }
   passthrough() {
     return new _ZodObject({
       ...this._def,
-      unknownKeys: "passthrough",
+      unknownKeys: "passthrough"
     });
   }
   // const AugmentFactory =
@@ -2222,8 +2416,8 @@ var ZodObject = class _ZodObject extends ZodType {
       ...this._def,
       shape: () => ({
         ...this._def.shape(),
-        ...augmentation,
-      }),
+        ...augmentation
+      })
     });
   }
   /**
@@ -2237,9 +2431,9 @@ var ZodObject = class _ZodObject extends ZodType {
       catchall: merging._def.catchall,
       shape: () => ({
         ...this._def.shape(),
-        ...merging._def.shape(),
+        ...merging._def.shape()
       }),
-      typeName: ZodFirstPartyTypeKind.ZodObject,
+      typeName: ZodFirstPartyTypeKind.ZodObject
     });
     return merged;
   }
@@ -2305,7 +2499,7 @@ var ZodObject = class _ZodObject extends ZodType {
   catchall(index) {
     return new _ZodObject({
       ...this._def,
-      catchall: index,
+      catchall: index
     });
   }
   pick(mask) {
@@ -2317,7 +2511,7 @@ var ZodObject = class _ZodObject extends ZodType {
     });
     return new _ZodObject({
       ...this._def,
-      shape: () => shape,
+      shape: () => shape
     });
   }
   omit(mask) {
@@ -2329,7 +2523,7 @@ var ZodObject = class _ZodObject extends ZodType {
     });
     return new _ZodObject({
       ...this._def,
-      shape: () => shape,
+      shape: () => shape
     });
   }
   /**
@@ -2350,7 +2544,7 @@ var ZodObject = class _ZodObject extends ZodType {
     });
     return new _ZodObject({
       ...this._def,
-      shape: () => newShape,
+      shape: () => newShape
     });
   }
   required(mask) {
@@ -2369,7 +2563,7 @@ var ZodObject = class _ZodObject extends ZodType {
     });
     return new _ZodObject({
       ...this._def,
-      shape: () => newShape,
+      shape: () => newShape
     });
   }
   keyof() {
@@ -2382,7 +2576,7 @@ ZodObject.create = (shape, params) => {
     unknownKeys: "strip",
     catchall: ZodNever.create(),
     typeName: ZodFirstPartyTypeKind.ZodObject,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 ZodObject.strictCreate = (shape, params) => {
@@ -2391,7 +2585,7 @@ ZodObject.strictCreate = (shape, params) => {
     unknownKeys: "strict",
     catchall: ZodNever.create(),
     typeName: ZodFirstPartyTypeKind.ZodObject,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 ZodObject.lazycreate = (shape, params) => {
@@ -2400,7 +2594,7 @@ ZodObject.lazycreate = (shape, params) => {
     unknownKeys: "strip",
     catchall: ZodNever.create(),
     typeName: ZodFirstPartyTypeKind.ZodObject,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodUnion = class extends ZodType {
@@ -2422,31 +2616,29 @@ var ZodUnion = class extends ZodType {
       const unionErrors = results.map((result) => new ZodError(result.ctx.common.issues));
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_union,
-        unionErrors,
+        unionErrors
       });
       return INVALID;
     }
     if (ctx.common.async) {
-      return Promise.all(
-        options.map(async (option) => {
-          const childCtx = {
-            ...ctx,
-            common: {
-              ...ctx.common,
-              issues: [],
-            },
-            parent: null,
-          };
-          return {
-            result: await option._parseAsync({
-              data: ctx.data,
-              path: ctx.path,
-              parent: childCtx,
-            }),
-            ctx: childCtx,
-          };
-        })
-      ).then(handleResults);
+      return Promise.all(options.map(async (option) => {
+        const childCtx = {
+          ...ctx,
+          common: {
+            ...ctx.common,
+            issues: []
+          },
+          parent: null
+        };
+        return {
+          result: await option._parseAsync({
+            data: ctx.data,
+            path: ctx.path,
+            parent: childCtx
+          }),
+          ctx: childCtx
+        };
+      })).then(handleResults);
     } else {
       let dirty = void 0;
       const issues = [];
@@ -2455,14 +2647,14 @@ var ZodUnion = class extends ZodType {
           ...ctx,
           common: {
             ...ctx.common,
-            issues: [],
+            issues: []
           },
-          parent: null,
+          parent: null
         };
         const result = option._parseSync({
           data: ctx.data,
           path: ctx.path,
-          parent: childCtx,
+          parent: childCtx
         });
         if (result.status === "valid") {
           return result;
@@ -2480,7 +2672,7 @@ var ZodUnion = class extends ZodType {
       const unionErrors = issues.map((issues2) => new ZodError(issues2));
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_union,
-        unionErrors,
+        unionErrors
       });
       return INVALID;
     }
@@ -2493,7 +2685,7 @@ ZodUnion.create = (types, params) => {
   return new ZodUnion({
     options: types,
     typeName: ZodFirstPartyTypeKind.ZodUnion,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var getDiscriminator = (type) => {
@@ -2534,7 +2726,7 @@ var ZodDiscriminatedUnion = class _ZodDiscriminatedUnion extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.object,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -2545,7 +2737,7 @@ var ZodDiscriminatedUnion = class _ZodDiscriminatedUnion extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_union_discriminator,
         options: Array.from(this.optionsMap.keys()),
-        path: [discriminator],
+        path: [discriminator]
       });
       return INVALID;
     }
@@ -2553,13 +2745,13 @@ var ZodDiscriminatedUnion = class _ZodDiscriminatedUnion extends ZodType {
       return option._parseAsync({
         data: ctx.data,
         path: ctx.path,
-        parent: ctx,
+        parent: ctx
       });
     } else {
       return option._parseSync({
         data: ctx.data,
         path: ctx.path,
-        parent: ctx,
+        parent: ctx
       });
     }
   }
@@ -2599,7 +2791,7 @@ var ZodDiscriminatedUnion = class _ZodDiscriminatedUnion extends ZodType {
       discriminator,
       options,
       optionsMap,
-      ...processCreateParams(params),
+      ...processCreateParams(params)
     });
   }
 };
@@ -2651,7 +2843,7 @@ var ZodIntersection = class extends ZodType {
       const merged = mergeValues(parsedLeft.value, parsedRight.value);
       if (!merged.valid) {
         addIssueToContext(ctx, {
-          code: ZodIssueCode.invalid_intersection_types,
+          code: ZodIssueCode.invalid_intersection_types
         });
         return INVALID;
       }
@@ -2665,27 +2857,24 @@ var ZodIntersection = class extends ZodType {
         this._def.left._parseAsync({
           data: ctx.data,
           path: ctx.path,
-          parent: ctx,
+          parent: ctx
         }),
         this._def.right._parseAsync({
           data: ctx.data,
           path: ctx.path,
-          parent: ctx,
-        }),
+          parent: ctx
+        })
       ]).then(([left, right]) => handleParsed(left, right));
     } else {
-      return handleParsed(
-        this._def.left._parseSync({
-          data: ctx.data,
-          path: ctx.path,
-          parent: ctx,
-        }),
-        this._def.right._parseSync({
-          data: ctx.data,
-          path: ctx.path,
-          parent: ctx,
-        })
-      );
+      return handleParsed(this._def.left._parseSync({
+        data: ctx.data,
+        path: ctx.path,
+        parent: ctx
+      }), this._def.right._parseSync({
+        data: ctx.data,
+        path: ctx.path,
+        parent: ctx
+      }));
     }
   }
 };
@@ -2694,7 +2883,7 @@ ZodIntersection.create = (left, right, params) => {
     left,
     right,
     typeName: ZodFirstPartyTypeKind.ZodIntersection,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodTuple = class _ZodTuple extends ZodType {
@@ -2704,7 +2893,7 @@ var ZodTuple = class _ZodTuple extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.array,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -2714,7 +2903,7 @@ var ZodTuple = class _ZodTuple extends ZodType {
         minimum: this._def.items.length,
         inclusive: true,
         exact: false,
-        type: "array",
+        type: "array"
       });
       return INVALID;
     }
@@ -2725,17 +2914,16 @@ var ZodTuple = class _ZodTuple extends ZodType {
         maximum: this._def.items.length,
         inclusive: true,
         exact: false,
-        type: "array",
+        type: "array"
       });
       status.dirty();
     }
-    const items = [...ctx.data]
-      .map((item, itemIndex) => {
-        const schema = this._def.items[itemIndex] || this._def.rest;
-        if (!schema) return null;
-        return schema._parse(new ParseInputLazyPath(ctx, item, ctx.path, itemIndex));
-      })
-      .filter((x) => !!x);
+    const items = [...ctx.data].map((item, itemIndex) => {
+      const schema = this._def.items[itemIndex] || this._def.rest;
+      if (!schema)
+        return null;
+      return schema._parse(new ParseInputLazyPath(ctx, item, ctx.path, itemIndex));
+    }).filter((x) => !!x);
     if (ctx.common.async) {
       return Promise.all(items).then((results) => {
         return ParseStatus.mergeArray(status, results);
@@ -2750,7 +2938,7 @@ var ZodTuple = class _ZodTuple extends ZodType {
   rest(rest) {
     return new _ZodTuple({
       ...this._def,
-      rest,
+      rest
     });
   }
 };
@@ -2762,7 +2950,7 @@ ZodTuple.create = (schemas, params) => {
     items: schemas,
     typeName: ZodFirstPartyTypeKind.ZodTuple,
     rest: null,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodRecord = class _ZodRecord extends ZodType {
@@ -2778,7 +2966,7 @@ var ZodRecord = class _ZodRecord extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.object,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -2789,7 +2977,7 @@ var ZodRecord = class _ZodRecord extends ZodType {
       pairs.push({
         key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, key)),
         value: valueType._parse(new ParseInputLazyPath(ctx, ctx.data[key], ctx.path, key)),
-        alwaysSet: key in ctx.data,
+        alwaysSet: key in ctx.data
       });
     }
     if (ctx.common.async) {
@@ -2807,14 +2995,14 @@ var ZodRecord = class _ZodRecord extends ZodType {
         keyType: first,
         valueType: second,
         typeName: ZodFirstPartyTypeKind.ZodRecord,
-        ...processCreateParams(third),
+        ...processCreateParams(third)
       });
     }
     return new _ZodRecord({
       keyType: ZodString.create(),
       valueType: first,
       typeName: ZodFirstPartyTypeKind.ZodRecord,
-      ...processCreateParams(second),
+      ...processCreateParams(second)
     });
   }
 };
@@ -2831,7 +3019,7 @@ var ZodMap = class extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.map,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -2840,7 +3028,7 @@ var ZodMap = class extends ZodType {
     const pairs = [...ctx.data.entries()].map(([key, value], index) => {
       return {
         key: keyType._parse(new ParseInputLazyPath(ctx, key, ctx.path, [index, "key"])),
-        value: valueType._parse(new ParseInputLazyPath(ctx, value, ctx.path, [index, "value"])),
+        value: valueType._parse(new ParseInputLazyPath(ctx, value, ctx.path, [index, "value"]))
       };
     });
     if (ctx.common.async) {
@@ -2881,7 +3069,7 @@ ZodMap.create = (keyType, valueType, params) => {
     valueType,
     keyType,
     typeName: ZodFirstPartyTypeKind.ZodMap,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodSet = class _ZodSet extends ZodType {
@@ -2891,7 +3079,7 @@ var ZodSet = class _ZodSet extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.set,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -2904,7 +3092,7 @@ var ZodSet = class _ZodSet extends ZodType {
           type: "set",
           inclusive: true,
           exact: false,
-          message: def.minSize.message,
+          message: def.minSize.message
         });
         status.dirty();
       }
@@ -2917,7 +3105,7 @@ var ZodSet = class _ZodSet extends ZodType {
           type: "set",
           inclusive: true,
           exact: false,
-          message: def.maxSize.message,
+          message: def.maxSize.message
         });
         status.dirty();
       }
@@ -2926,8 +3114,10 @@ var ZodSet = class _ZodSet extends ZodType {
     function finalizeSet(elements2) {
       const parsedSet = /* @__PURE__ */ new Set();
       for (const element of elements2) {
-        if (element.status === "aborted") return INVALID;
-        if (element.status === "dirty") status.dirty();
+        if (element.status === "aborted")
+          return INVALID;
+        if (element.status === "dirty")
+          status.dirty();
         parsedSet.add(element.value);
       }
       return { status: status.value, value: parsedSet };
@@ -2942,13 +3132,13 @@ var ZodSet = class _ZodSet extends ZodType {
   min(minSize, message) {
     return new _ZodSet({
       ...this._def,
-      minSize: { value: minSize, message: errorUtil.toString(message) },
+      minSize: { value: minSize, message: errorUtil.toString(message) }
     });
   }
   max(maxSize, message) {
     return new _ZodSet({
       ...this._def,
-      maxSize: { value: maxSize, message: errorUtil.toString(message) },
+      maxSize: { value: maxSize, message: errorUtil.toString(message) }
     });
   }
   size(size, message) {
@@ -2964,7 +3154,7 @@ ZodSet.create = (valueType, params) => {
     minSize: null,
     maxSize: null,
     typeName: ZodFirstPartyTypeKind.ZodSet,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodFunction = class _ZodFunction extends ZodType {
@@ -2978,7 +3168,7 @@ var ZodFunction = class _ZodFunction extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.function,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -2986,29 +3176,39 @@ var ZodFunction = class _ZodFunction extends ZodType {
       return makeIssue({
         data: args,
         path: ctx.path,
-        errorMaps: [ctx.common.contextualErrorMap, ctx.schemaErrorMap, getErrorMap(), errorMap].filter((x) => !!x),
+        errorMaps: [
+          ctx.common.contextualErrorMap,
+          ctx.schemaErrorMap,
+          getErrorMap(),
+          errorMap
+        ].filter((x) => !!x),
         issueData: {
           code: ZodIssueCode.invalid_arguments,
-          argumentsError: error,
-        },
+          argumentsError: error
+        }
       });
     }
     function makeReturnsIssue(returns, error) {
       return makeIssue({
         data: returns,
         path: ctx.path,
-        errorMaps: [ctx.common.contextualErrorMap, ctx.schemaErrorMap, getErrorMap(), errorMap].filter((x) => !!x),
+        errorMaps: [
+          ctx.common.contextualErrorMap,
+          ctx.schemaErrorMap,
+          getErrorMap(),
+          errorMap
+        ].filter((x) => !!x),
         issueData: {
           code: ZodIssueCode.invalid_return_type,
-          returnTypeError: error,
-        },
+          returnTypeError: error
+        }
       });
     }
     const params = { errorMap: ctx.common.contextualErrorMap };
     const fn = ctx.data;
     if (this._def.returns instanceof ZodPromise) {
       const me = this;
-      return OK(async function (...args) {
+      return OK(async function(...args) {
         const error = new ZodError([]);
         const parsedArgs = await me._def.args.parseAsync(args, params).catch((e) => {
           error.addIssue(makeArgsIssue(args, e));
@@ -3023,7 +3223,7 @@ var ZodFunction = class _ZodFunction extends ZodType {
       });
     } else {
       const me = this;
-      return OK(function (...args) {
+      return OK(function(...args) {
         const parsedArgs = me._def.args.safeParse(args, params);
         if (!parsedArgs.success) {
           throw new ZodError([makeArgsIssue(args, parsedArgs.error)]);
@@ -3046,13 +3246,13 @@ var ZodFunction = class _ZodFunction extends ZodType {
   args(...items) {
     return new _ZodFunction({
       ...this._def,
-      args: ZodTuple.create(items).rest(ZodUnknown.create()),
+      args: ZodTuple.create(items).rest(ZodUnknown.create())
     });
   }
   returns(returnType) {
     return new _ZodFunction({
       ...this._def,
-      returns: returnType,
+      returns: returnType
     });
   }
   implement(func) {
@@ -3068,7 +3268,7 @@ var ZodFunction = class _ZodFunction extends ZodType {
       args: args ? args : ZodTuple.create([]).rest(ZodUnknown.create()),
       returns: returns || ZodUnknown.create(),
       typeName: ZodFirstPartyTypeKind.ZodFunction,
-      ...processCreateParams(params),
+      ...processCreateParams(params)
     });
   }
 };
@@ -3086,7 +3286,7 @@ ZodLazy.create = (getter, params) => {
   return new ZodLazy({
     getter,
     typeName: ZodFirstPartyTypeKind.ZodLazy,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodLiteral = class extends ZodType {
@@ -3096,7 +3296,7 @@ var ZodLiteral = class extends ZodType {
       addIssueToContext(ctx, {
         received: ctx.data,
         code: ZodIssueCode.invalid_literal,
-        expected: this._def.value,
+        expected: this._def.value
       });
       return INVALID;
     }
@@ -3110,14 +3310,14 @@ ZodLiteral.create = (value, params) => {
   return new ZodLiteral({
     value,
     typeName: ZodFirstPartyTypeKind.ZodLiteral,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 function createZodEnum(values, params) {
   return new ZodEnum({
     values,
     typeName: ZodFirstPartyTypeKind.ZodEnum,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 }
 var ZodEnum = class _ZodEnum extends ZodType {
@@ -3132,7 +3332,7 @@ var ZodEnum = class _ZodEnum extends ZodType {
       addIssueToContext(ctx, {
         expected: util.joinValues(expectedValues),
         received: ctx.parsedType,
-        code: ZodIssueCode.invalid_type,
+        code: ZodIssueCode.invalid_type
       });
       return INVALID;
     }
@@ -3145,7 +3345,7 @@ var ZodEnum = class _ZodEnum extends ZodType {
       addIssueToContext(ctx, {
         received: ctx.data,
         code: ZodIssueCode.invalid_enum_value,
-        options: expectedValues,
+        options: expectedValues
       });
       return INVALID;
     }
@@ -3178,17 +3378,14 @@ var ZodEnum = class _ZodEnum extends ZodType {
   extract(values, newDef = this._def) {
     return _ZodEnum.create(values, {
       ...this._def,
-      ...newDef,
+      ...newDef
     });
   }
   exclude(values, newDef = this._def) {
-    return _ZodEnum.create(
-      this.options.filter((opt) => !values.includes(opt)),
-      {
-        ...this._def,
-        ...newDef,
-      }
-    );
+    return _ZodEnum.create(this.options.filter((opt) => !values.includes(opt)), {
+      ...this._def,
+      ...newDef
+    });
   }
 };
 _ZodEnum_cache = /* @__PURE__ */ new WeakMap();
@@ -3206,7 +3403,7 @@ var ZodNativeEnum = class extends ZodType {
       addIssueToContext(ctx, {
         expected: util.joinValues(expectedValues),
         received: ctx.parsedType,
-        code: ZodIssueCode.invalid_type,
+        code: ZodIssueCode.invalid_type
       });
       return INVALID;
     }
@@ -3218,7 +3415,7 @@ var ZodNativeEnum = class extends ZodType {
       addIssueToContext(ctx, {
         received: ctx.data,
         code: ZodIssueCode.invalid_enum_value,
-        options: expectedValues,
+        options: expectedValues
       });
       return INVALID;
     }
@@ -3233,7 +3430,7 @@ ZodNativeEnum.create = (values, params) => {
   return new ZodNativeEnum({
     values,
     typeName: ZodFirstPartyTypeKind.ZodNativeEnum,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodPromise = class extends ZodType {
@@ -3246,26 +3443,24 @@ var ZodPromise = class extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.promise,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
     const promisified = ctx.parsedType === ZodParsedType.promise ? ctx.data : Promise.resolve(ctx.data);
-    return OK(
-      promisified.then((data) => {
-        return this._def.type.parseAsync(data, {
-          path: ctx.path,
-          errorMap: ctx.common.contextualErrorMap,
-        });
-      })
-    );
+    return OK(promisified.then((data) => {
+      return this._def.type.parseAsync(data, {
+        path: ctx.path,
+        errorMap: ctx.common.contextualErrorMap
+      });
+    }));
   }
 };
 ZodPromise.create = (schema, params) => {
   return new ZodPromise({
     type: schema,
     typeName: ZodFirstPartyTypeKind.ZodPromise,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodEffects = class extends ZodType {
@@ -3289,34 +3484,42 @@ var ZodEffects = class extends ZodType {
       },
       get path() {
         return ctx.path;
-      },
+      }
     };
     checkCtx.addIssue = checkCtx.addIssue.bind(checkCtx);
     if (effect.type === "preprocess") {
       const processed = effect.transform(ctx.data, checkCtx);
       if (ctx.common.async) {
         return Promise.resolve(processed).then(async (processed2) => {
-          if (status.value === "aborted") return INVALID;
+          if (status.value === "aborted")
+            return INVALID;
           const result = await this._def.schema._parseAsync({
             data: processed2,
             path: ctx.path,
-            parent: ctx,
+            parent: ctx
           });
-          if (result.status === "aborted") return INVALID;
-          if (result.status === "dirty") return DIRTY(result.value);
-          if (status.value === "dirty") return DIRTY(result.value);
+          if (result.status === "aborted")
+            return INVALID;
+          if (result.status === "dirty")
+            return DIRTY(result.value);
+          if (status.value === "dirty")
+            return DIRTY(result.value);
           return result;
         });
       } else {
-        if (status.value === "aborted") return INVALID;
+        if (status.value === "aborted")
+          return INVALID;
         const result = this._def.schema._parseSync({
           data: processed,
           path: ctx.path,
-          parent: ctx,
+          parent: ctx
         });
-        if (result.status === "aborted") return INVALID;
-        if (result.status === "dirty") return DIRTY(result.value);
-        if (status.value === "dirty") return DIRTY(result.value);
+        if (result.status === "aborted")
+          return INVALID;
+        if (result.status === "dirty")
+          return DIRTY(result.value);
+        if (status.value === "dirty")
+          return DIRTY(result.value);
         return result;
       }
     }
@@ -3335,16 +3538,20 @@ var ZodEffects = class extends ZodType {
         const inner = this._def.schema._parseSync({
           data: ctx.data,
           path: ctx.path,
-          parent: ctx,
+          parent: ctx
         });
-        if (inner.status === "aborted") return INVALID;
-        if (inner.status === "dirty") status.dirty();
+        if (inner.status === "aborted")
+          return INVALID;
+        if (inner.status === "dirty")
+          status.dirty();
         executeRefinement(inner.value);
         return { status: status.value, value: inner.value };
       } else {
         return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((inner) => {
-          if (inner.status === "aborted") return INVALID;
-          if (inner.status === "dirty") status.dirty();
+          if (inner.status === "aborted")
+            return INVALID;
+          if (inner.status === "dirty")
+            status.dirty();
           return executeRefinement(inner.value).then(() => {
             return { status: status.value, value: inner.value };
           });
@@ -3356,9 +3563,10 @@ var ZodEffects = class extends ZodType {
         const base = this._def.schema._parseSync({
           data: ctx.data,
           path: ctx.path,
-          parent: ctx,
+          parent: ctx
         });
-        if (!isValid(base)) return base;
+        if (!isValid(base))
+          return base;
         const result = effect.transform(base.value, checkCtx);
         if (result instanceof Promise) {
           throw new Error(`Asynchronous transform encountered during synchronous parse operation. Use .parseAsync instead.`);
@@ -3366,7 +3574,8 @@ var ZodEffects = class extends ZodType {
         return { status: status.value, value: result };
       } else {
         return this._def.schema._parseAsync({ data: ctx.data, path: ctx.path, parent: ctx }).then((base) => {
-          if (!isValid(base)) return base;
+          if (!isValid(base))
+            return base;
           return Promise.resolve(effect.transform(base.value, checkCtx)).then((result) => ({ status: status.value, value: result }));
         });
       }
@@ -3379,7 +3588,7 @@ ZodEffects.create = (schema, effect, params) => {
     schema,
     typeName: ZodFirstPartyTypeKind.ZodEffects,
     effect,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 ZodEffects.createWithPreprocess = (preprocess, schema, params) => {
@@ -3387,7 +3596,7 @@ ZodEffects.createWithPreprocess = (preprocess, schema, params) => {
     schema,
     effect: { type: "preprocess", transform: preprocess },
     typeName: ZodFirstPartyTypeKind.ZodEffects,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodOptional = class extends ZodType {
@@ -3406,7 +3615,7 @@ ZodOptional.create = (type, params) => {
   return new ZodOptional({
     innerType: type,
     typeName: ZodFirstPartyTypeKind.ZodOptional,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodNullable = class extends ZodType {
@@ -3425,7 +3634,7 @@ ZodNullable.create = (type, params) => {
   return new ZodNullable({
     innerType: type,
     typeName: ZodFirstPartyTypeKind.ZodNullable,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodDefault = class extends ZodType {
@@ -3438,7 +3647,7 @@ var ZodDefault = class extends ZodType {
     return this._def.innerType._parse({
       data,
       path: ctx.path,
-      parent: ctx,
+      parent: ctx
     });
   }
   removeDefault() {
@@ -3450,7 +3659,7 @@ ZodDefault.create = (type, params) => {
     innerType: type,
     typeName: ZodFirstPartyTypeKind.ZodDefault,
     defaultValue: typeof params.default === "function" ? params.default : () => params.default,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodCatch = class extends ZodType {
@@ -3460,43 +3669,37 @@ var ZodCatch = class extends ZodType {
       ...ctx,
       common: {
         ...ctx.common,
-        issues: [],
-      },
+        issues: []
+      }
     };
     const result = this._def.innerType._parse({
       data: newCtx.data,
       path: newCtx.path,
       parent: {
-        ...newCtx,
-      },
+        ...newCtx
+      }
     });
     if (isAsync(result)) {
       return result.then((result2) => {
         return {
           status: "valid",
-          value:
-            result2.status === "valid"
-              ? result2.value
-              : this._def.catchValue({
-                  get error() {
-                    return new ZodError(newCtx.common.issues);
-                  },
-                  input: newCtx.data,
-                }),
+          value: result2.status === "valid" ? result2.value : this._def.catchValue({
+            get error() {
+              return new ZodError(newCtx.common.issues);
+            },
+            input: newCtx.data
+          })
         };
       });
     } else {
       return {
         status: "valid",
-        value:
-          result.status === "valid"
-            ? result.value
-            : this._def.catchValue({
-                get error() {
-                  return new ZodError(newCtx.common.issues);
-                },
-                input: newCtx.data,
-              }),
+        value: result.status === "valid" ? result.value : this._def.catchValue({
+          get error() {
+            return new ZodError(newCtx.common.issues);
+          },
+          input: newCtx.data
+        })
       };
     }
   }
@@ -3509,7 +3712,7 @@ ZodCatch.create = (type, params) => {
     innerType: type,
     typeName: ZodFirstPartyTypeKind.ZodCatch,
     catchValue: typeof params.catch === "function" ? params.catch : () => params.catch,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var ZodNaN = class extends ZodType {
@@ -3520,7 +3723,7 @@ var ZodNaN = class extends ZodType {
       addIssueToContext(ctx, {
         code: ZodIssueCode.invalid_type,
         expected: ZodParsedType.nan,
-        received: ctx.parsedType,
+        received: ctx.parsedType
       });
       return INVALID;
     }
@@ -3530,7 +3733,7 @@ var ZodNaN = class extends ZodType {
 ZodNaN.create = (params) => {
   return new ZodNaN({
     typeName: ZodFirstPartyTypeKind.ZodNaN,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 var BRAND = Symbol("zod_brand");
@@ -3541,7 +3744,7 @@ var ZodBranded = class extends ZodType {
     return this._def.type._parse({
       data,
       path: ctx.path,
-      parent: ctx,
+      parent: ctx
     });
   }
   unwrap() {
@@ -3556,9 +3759,10 @@ var ZodPipeline = class _ZodPipeline extends ZodType {
         const inResult = await this._def.in._parseAsync({
           data: ctx.data,
           path: ctx.path,
-          parent: ctx,
+          parent: ctx
         });
-        if (inResult.status === "aborted") return INVALID;
+        if (inResult.status === "aborted")
+          return INVALID;
         if (inResult.status === "dirty") {
           status.dirty();
           return DIRTY(inResult.value);
@@ -3566,7 +3770,7 @@ var ZodPipeline = class _ZodPipeline extends ZodType {
           return this._def.out._parseAsync({
             data: inResult.value,
             path: ctx.path,
-            parent: ctx,
+            parent: ctx
           });
         }
       };
@@ -3575,20 +3779,21 @@ var ZodPipeline = class _ZodPipeline extends ZodType {
       const inResult = this._def.in._parseSync({
         data: ctx.data,
         path: ctx.path,
-        parent: ctx,
+        parent: ctx
       });
-      if (inResult.status === "aborted") return INVALID;
+      if (inResult.status === "aborted")
+        return INVALID;
       if (inResult.status === "dirty") {
         status.dirty();
         return {
           status: "dirty",
-          value: inResult.value,
+          value: inResult.value
         };
       } else {
         return this._def.out._parseSync({
           data: inResult.value,
           path: ctx.path,
-          parent: ctx,
+          parent: ctx
         });
       }
     }
@@ -3597,7 +3802,7 @@ var ZodPipeline = class _ZodPipeline extends ZodType {
     return new _ZodPipeline({
       in: a,
       out: b,
-      typeName: ZodFirstPartyTypeKind.ZodPipeline,
+      typeName: ZodFirstPartyTypeKind.ZodPipeline
     });
   }
 };
@@ -3620,7 +3825,7 @@ ZodReadonly.create = (type, params) => {
   return new ZodReadonly({
     innerType: type,
     typeName: ZodFirstPartyTypeKind.ZodReadonly,
-    ...processCreateParams(params),
+    ...processCreateParams(params)
   });
 };
 function custom(check, params = {}, fatal) {
@@ -3637,10 +3842,10 @@ function custom(check, params = {}, fatal) {
   return ZodAny.create();
 }
 var late = {
-  object: ZodObject.lazycreate,
+  object: ZodObject.lazycreate
 };
 var ZodFirstPartyTypeKind;
-(function (ZodFirstPartyTypeKind2) {
+(function(ZodFirstPartyTypeKind2) {
   ZodFirstPartyTypeKind2["ZodString"] = "ZodString";
   ZodFirstPartyTypeKind2["ZodNumber"] = "ZodNumber";
   ZodFirstPartyTypeKind2["ZodNaN"] = "ZodNaN";
@@ -3678,12 +3883,9 @@ var ZodFirstPartyTypeKind;
   ZodFirstPartyTypeKind2["ZodPipeline"] = "ZodPipeline";
   ZodFirstPartyTypeKind2["ZodReadonly"] = "ZodReadonly";
 })(ZodFirstPartyTypeKind || (ZodFirstPartyTypeKind = {}));
-var instanceOfType = (
-  cls,
-  params = {
-    message: `Input not instance of ${cls.name}`,
-  }
-) => custom((data) => data instanceof cls, params);
+var instanceOfType = (cls, params = {
+  message: `Input not instance of ${cls.name}`
+}) => custom((data) => data instanceof cls, params);
 var stringType = ZodString.create;
 var numberType = ZodNumber.create;
 var nanType = ZodNaN.create;
@@ -3724,13 +3926,12 @@ var oboolean = () => booleanType().optional();
 var coerce = {
   string: (arg) => ZodString.create({ ...arg, coerce: true }),
   number: (arg) => ZodNumber.create({ ...arg, coerce: true }),
-  boolean: (arg) =>
-    ZodBoolean.create({
-      ...arg,
-      coerce: true,
-    }),
+  boolean: (arg) => ZodBoolean.create({
+    ...arg,
+    coerce: true
+  }),
   bigint: (arg) => ZodBigInt.create({ ...arg, coerce: true }),
-  date: (arg) => ZodDate.create({ ...arg, coerce: true }),
+  date: (arg) => ZodDate.create({ ...arg, coerce: true })
 };
 var NEVER = INVALID;
 var z = /* @__PURE__ */ Object.freeze({
@@ -3812,9 +4013,9 @@ var z = /* @__PURE__ */ Object.freeze({
   date: dateType,
   discriminatedUnion: discriminatedUnionType,
   effect: effectsType,
-  enum: enumType,
-  function: functionType,
-  instanceof: instanceOfType,
+  "enum": enumType,
+  "function": functionType,
+  "instanceof": instanceOfType,
   intersection: intersectionType,
   lazy: lazyType,
   literal: literalType,
@@ -3822,7 +4023,7 @@ var z = /* @__PURE__ */ Object.freeze({
   nan: nanType,
   nativeEnum: nativeEnumType,
   never: neverType,
-  null: nullType,
+  "null": nullType,
   nullable: nullableType,
   number: numberType,
   object: objectType,
@@ -3840,29 +4041,27 @@ var z = /* @__PURE__ */ Object.freeze({
   symbol: symbolType,
   transformer: effectsType,
   tuple: tupleType,
-  undefined: undefinedType,
+  "undefined": undefinedType,
   union: unionType,
   unknown: unknownType,
-  void: voidType,
+  "void": voidType,
   NEVER,
   ZodIssueCode,
   quotelessJson,
-  ZodError,
+  ZodError
 });
 
 // src/environment.ts
-var coingeckoConfigSchema = z
-  .object({
-    COINGECKO_API_KEY: z.string().nullable(),
-    COINGECKO_PRO_API_KEY: z.string().nullable(),
-  })
-  .refine((data) => data.COINGECKO_API_KEY || data.COINGECKO_PRO_API_KEY, {
-    message: "Either COINGECKO_API_KEY or COINGECKO_PRO_API_KEY must be provided",
-  });
+var coingeckoConfigSchema = z.object({
+  COINGECKO_API_KEY: z.string().nullable(),
+  COINGECKO_PRO_API_KEY: z.string().nullable()
+}).refine((data) => data.COINGECKO_API_KEY || data.COINGECKO_PRO_API_KEY, {
+  message: "Either COINGECKO_API_KEY or COINGECKO_PRO_API_KEY must be provided"
+});
 async function validateCoingeckoConfig(runtime) {
   const config = {
     COINGECKO_API_KEY: runtime.getSetting("COINGECKO_API_KEY"),
-    COINGECKO_PRO_API_KEY: runtime.getSetting("COINGECKO_PRO_API_KEY"),
+    COINGECKO_PRO_API_KEY: runtime.getSetting("COINGECKO_PRO_API_KEY")
   };
   return coingeckoConfigSchema.parse(config);
 }
@@ -3871,7 +4070,7 @@ function getApiConfig(config) {
   return {
     baseUrl: isPro ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3",
     apiKey: isPro ? config.COINGECKO_PRO_API_KEY : config.COINGECKO_API_KEY,
-    headerKey: isPro ? "x-cg-pro-api-key" : "x-cg-demo-api-key",
+    headerKey: isPro ? "x-cg-pro-api-key" : "x-cg-demo-api-key"
   };
 }
 
@@ -3884,14 +4083,17 @@ var MAX_RETRIES = 3;
 async function fetchCategories(runtime) {
   const config = await validateCoingeckoConfig(runtime);
   const { baseUrl, apiKey, headerKey } = getApiConfig(config);
-  const response = await axios.get(`${baseUrl}/coins/categories/list`, {
-    headers: {
-      accept: "application/json",
-      [headerKey]: apiKey,
-    },
-    timeout: 5e3,
-    // 5 second timeout
-  });
+  const response = await axios.get(
+    `${baseUrl}/coins/categories/list`,
+    {
+      headers: {
+        "accept": "application/json",
+        [headerKey]: apiKey
+      },
+      timeout: 5e3
+      // 5 second timeout
+    }
+  );
   if (!response.data?.length) {
     throw new Error("Invalid categories data received");
   }
@@ -3925,7 +4127,15 @@ async function getCategories(runtime) {
   }
 }
 function formatCategoriesContext(categories) {
-  const popularCategories = ["layer-1", "defi", "meme", "ai-meme-coins", "artificial-intelligence", "gaming", "metaverse"];
+  const popularCategories = [
+    "layer-1",
+    "defi",
+    "meme",
+    "ai-meme-coins",
+    "artificial-intelligence",
+    "gaming",
+    "metaverse"
+  ];
   const popular = categories.filter((c) => popularCategories.includes(c.category_id)).map((c) => `${c.name} (${c.category_id})`);
   return `
 Available cryptocurrency categories:
@@ -3948,7 +4158,7 @@ var categoriesProvider = {
       elizaLogger.error("Categories provider error:", error);
       return "Cryptocurrency categories are temporarily unavailable. Please try again later.";
     }
-  },
+  }
 };
 async function getCategoriesData(runtime) {
   return getCategories(runtime);
@@ -4020,11 +4230,15 @@ function formatCategory(category, categories) {
   if (exactMatch) {
     return exactMatch.category_id;
   }
-  const nameMatch = categories.find((c) => c.name.toLowerCase() === normalizedInput || c.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === normalizedInput);
+  const nameMatch = categories.find(
+    (c) => c.name.toLowerCase() === normalizedInput || c.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === normalizedInput
+  );
   if (nameMatch) {
     return nameMatch.category_id;
   }
-  const partialMatch = categories.find((c) => c.name.toLowerCase().includes(normalizedInput) || c.category_id.includes(normalizedInput));
+  const partialMatch = categories.find(
+    (c) => c.name.toLowerCase().includes(normalizedInput) || c.category_id.includes(normalizedInput)
+  );
   if (partialMatch) {
     return partialMatch.category_id;
   }
@@ -4036,14 +4250,21 @@ var GetMarketsSchema = z.object({
   order: z.enum(["market_cap_desc", "market_cap_asc", "volume_desc", "volume_asc"]).default("market_cap_desc"),
   per_page: z.number().min(1).max(250).default(20),
   page: z.number().min(1).default(1),
-  sparkline: z.boolean().default(false),
+  sparkline: z.boolean().default(false)
 });
 var isGetMarketsContent = (obj) => {
   return GetMarketsSchema.safeParse(obj).success;
 };
 var getMarkets_default = {
   name: "GET_MARKETS",
-  similes: ["MARKET_OVERVIEW", "TOP_RANKINGS", "MARKET_LEADERBOARD", "CRYPTO_RANKINGS", "BEST_PERFORMING_COINS", "TOP_MARKET_CAPS"],
+  similes: [
+    "MARKET_OVERVIEW",
+    "TOP_RANKINGS",
+    "MARKET_LEADERBOARD",
+    "CRYPTO_RANKINGS",
+    "BEST_PERFORMING_COINS",
+    "TOP_MARKET_CAPS"
+  ],
   // eslint-disable-next-line
   validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
@@ -4065,13 +4286,16 @@ var getMarkets_default = {
       const categories = await getCategoriesData(runtime);
       const marketsContext = composeContext({
         state: currentState,
-        template: getMarketsTemplate.replace("{{categories}}", categories.map((c) => `- ${c.name} (ID: ${c.category_id})`).join("\n")),
+        template: getMarketsTemplate.replace(
+          "{{categories}}",
+          categories.map((c) => `- ${c.name} (ID: ${c.category_id})`).join("\n")
+        )
       });
       const result = await generateObject({
         runtime,
         context: marketsContext,
         modelClass: ModelClass.SMALL,
-        schema: GetMarketsSchema,
+        schema: GetMarketsSchema
       });
       if (!isGetMarketsContent(result.object)) {
         elizaLogger2.error("Invalid market data format received");
@@ -4092,22 +4316,25 @@ var getMarkets_default = {
         vs_currency: content.vs_currency,
         order: content.order,
         per_page: content.per_page,
-        page: content.page,
+        page: content.page
       });
-      const response = await axios2.get(`${baseUrl}/coins/markets`, {
-        headers: {
-          accept: "application/json",
-          [headerKey]: apiKey,
-        },
-        params: {
-          vs_currency: content.vs_currency,
-          category: formattedCategory,
-          order: content.order,
-          per_page: content.per_page,
-          page: content.page,
-          sparkline: content.sparkline,
-        },
-      });
+      const response = await axios2.get(
+        `${baseUrl}/coins/markets`,
+        {
+          headers: {
+            "accept": "application/json",
+            [headerKey]: apiKey
+          },
+          params: {
+            vs_currency: content.vs_currency,
+            category: formattedCategory,
+            order: content.order,
+            per_page: content.per_page,
+            page: content.page,
+            sparkline: content.sparkline
+          }
+        }
+      );
       if (!response.data?.length) {
         throw new Error("No market data received from CoinGecko API");
       }
@@ -4125,10 +4352,15 @@ var getMarkets_default = {
         circulatingSupply: coin.circulating_supply,
         totalSupply: coin.total_supply,
         maxSupply: coin.max_supply,
-        lastUpdated: coin.last_updated,
+        lastUpdated: coin.last_updated
       }));
       const categoryDisplay = content.category ? `${categories.find((c) => c.category_id === formattedCategory)?.name.toUpperCase() || content.category.toUpperCase()} ` : "";
-      const responseText = [`Top ${formattedData.length} ${categoryDisplay}Cryptocurrencies by ${content.order === "volume_desc" || content.order === "volume_asc" ? "Volume" : "Market Cap"}:`, ...formattedData.map((coin, index) => `${index + 1}. ${coin.name} (${coin.symbol}) | $${coin.currentPrice.toLocaleString()} | ${coin.priceChangePercentage24h.toFixed(2)}% | MCap: $${(coin.marketCap / 1e9).toFixed(2)}B`)].join("\n");
+      const responseText = [
+        `Top ${formattedData.length} ${categoryDisplay}Cryptocurrencies by ${content.order === "volume_desc" || content.order === "volume_asc" ? "Volume" : "Market Cap"}:`,
+        ...formattedData.map(
+          (coin, index) => `${index + 1}. ${coin.name} (${coin.symbol}) | $${coin.currentPrice.toLocaleString()} | ${coin.priceChangePercentage24h.toFixed(2)}% | MCap: $${(coin.marketCap / 1e9).toFixed(2)}B`
+        )
+      ].join("\n");
       elizaLogger2.success("Market data retrieved successfully!");
       if (callback) {
         callback({
@@ -4140,10 +4372,10 @@ var getMarkets_default = {
               category: content.category,
               order: content.order,
               per_page: content.per_page,
-              page: content.page,
+              page: content.page
             },
-            timestamp: /* @__PURE__ */ new Date().toISOString(),
-          },
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
         });
       }
       return true;
@@ -4166,8 +4398,8 @@ var getMarkets_default = {
             message: error.message,
             statusCode: error.response?.status,
             params: error.config?.params,
-            requiresProPlan: error.response?.status === 403,
-          },
+            requiresProPlan: error.response?.status === 403
+          }
         });
       }
       return false;
@@ -4178,28 +4410,33 @@ var getMarkets_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "Show me the top cryptocurrencies by market cap",
-        },
+          text: "Show me the top cryptocurrencies by market cap"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll fetch the current market data for top cryptocurrencies.",
-          action: "GET_MARKETS",
-        },
+          action: "GET_MARKETS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the top cryptocurrencies:\n1. Bitcoin (BTC) | $45,000 | +2.5% | MCap: $870.5B\n{{dynamic}}",
-        },
-      },
-    ],
-  ],
+          text: "Here are the top cryptocurrencies:\n1. Bitcoin (BTC) | $45,000 | +2.5% | MCap: $870.5B\n{{dynamic}}"
+        }
+      }
+    ]
+  ]
 };
 
 // src/actions/getPrice.ts
-import { composeContext as composeContext2, elizaLogger as elizaLogger4, generateObject as generateObject2, ModelClass as ModelClass2 } from "@elizaos/core";
+import {
+  composeContext as composeContext2,
+  elizaLogger as elizaLogger4,
+  generateObject as generateObject2,
+  ModelClass as ModelClass2
+} from "@elizaos/core";
 import axios4 from "axios";
 
 // src/providers/coinsProvider.ts
@@ -4211,17 +4448,20 @@ var MAX_RETRIES2 = 3;
 async function fetchCoins(runtime, includePlatform = false) {
   const config = await validateCoingeckoConfig(runtime);
   const { baseUrl, apiKey, headerKey } = getApiConfig(config);
-  const response = await axios3.get(`${baseUrl}/coins/list`, {
-    params: {
-      include_platform: includePlatform,
-    },
-    headers: {
-      accept: "application/json",
-      [headerKey]: apiKey,
-    },
-    timeout: 5e3,
-    // 5 second timeout
-  });
+  const response = await axios3.get(
+    `${baseUrl}/coins/list`,
+    {
+      params: {
+        include_platform: includePlatform
+      },
+      headers: {
+        "accept": "application/json",
+        [headerKey]: apiKey
+      },
+      timeout: 5e3
+      // 5 second timeout
+    }
+  );
   if (!response.data?.length) {
     throw new Error("Invalid coins data received");
   }
@@ -4255,7 +4495,16 @@ async function getCoins(runtime, includePlatform = false) {
   }
 }
 function formatCoinsContext(coins) {
-  const popularCoins = ["bitcoin", "ethereum", "binancecoin", "ripple", "cardano", "solana", "polkadot", "dogecoin"];
+  const popularCoins = [
+    "bitcoin",
+    "ethereum",
+    "binancecoin",
+    "ripple",
+    "cardano",
+    "solana",
+    "polkadot",
+    "dogecoin"
+  ];
   const popular = coins.filter((c) => popularCoins.includes(c.id)).map((c) => `${c.name} (${c.symbol.toUpperCase()}) - ID: ${c.id}`);
   return `
 Available cryptocurrencies:
@@ -4278,7 +4527,7 @@ var coinsProvider = {
       elizaLogger3.error("Coins provider error:", error);
       return "Cryptocurrency list is temporarily unavailable. Please try again later.";
     }
-  },
+  }
 };
 async function getCoinsData(runtime, includePlatform = false) {
   return getCoins(runtime, includePlatform);
@@ -4358,7 +4607,7 @@ var GetPriceSchema = z.object({
   include_market_cap: z.boolean().default(false),
   include_24hr_vol: z.boolean().default(false),
   include_24hr_change: z.boolean().default(false),
-  include_last_updated_at: z.boolean().default(false),
+  include_last_updated_at: z.boolean().default(false)
 });
 var isGetPriceContent = (obj) => {
   return GetPriceSchema.safeParse(obj).success;
@@ -4371,7 +4620,14 @@ function formatCoinIds(input) {
 }
 var getPrice_default = {
   name: "GET_PRICE",
-  similes: ["COIN_PRICE_CHECK", "SPECIFIC_COINS_PRICE", "COIN_PRICE_LOOKUP", "SELECTED_COINS_PRICE", "PRICE_DETAILS", "COIN_PRICE_DATA"],
+  similes: [
+    "COIN_PRICE_CHECK",
+    "SPECIFIC_COINS_PRICE",
+    "COIN_PRICE_LOOKUP",
+    "SELECTED_COINS_PRICE",
+    "PRICE_DETAILS",
+    "COIN_PRICE_DATA"
+  ],
   // eslint-disable-next-line
   validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
@@ -4390,14 +4646,14 @@ var getPrice_default = {
       elizaLogger4.log("Composing price context...");
       const priceContext = composeContext2({
         state: currentState,
-        template: getPriceTemplate,
+        template: getPriceTemplate
       });
       elizaLogger4.log("Generating content from template...");
       const result = await generateObject2({
         runtime,
         context: priceContext,
         modelClass: ModelClass2.LARGE,
-        schema: GetPriceSchema,
+        schema: GetPriceSchema
       });
       if (!isGetPriceContent(result.object)) {
         elizaLogger4.error("Invalid price request format");
@@ -4419,80 +4675,75 @@ var getPrice_default = {
         include_market_cap: content.include_market_cap,
         include_24hr_vol: content.include_24hr_vol,
         include_24hr_change: content.include_24hr_change,
-        include_last_updated_at: content.include_last_updated_at,
+        include_last_updated_at: content.include_last_updated_at
       });
-      const response = await axios4.get(`${baseUrl}/simple/price`, {
-        params: {
-          ids: coinIds,
-          vs_currencies,
-          include_market_cap: content.include_market_cap,
-          include_24hr_vol: content.include_24hr_vol,
-          include_24hr_change: content.include_24hr_change,
-          include_last_updated_at: content.include_last_updated_at,
-        },
-        headers: {
-          accept: "application/json",
-          [headerKey]: apiKey,
-        },
-      });
+      const response = await axios4.get(
+        `${baseUrl}/simple/price`,
+        {
+          params: {
+            ids: coinIds,
+            vs_currencies,
+            include_market_cap: content.include_market_cap,
+            include_24hr_vol: content.include_24hr_vol,
+            include_24hr_change: content.include_24hr_change,
+            include_last_updated_at: content.include_last_updated_at
+          },
+          headers: {
+            "accept": "application/json",
+            [headerKey]: apiKey
+          }
+        }
+      );
       if (Object.keys(response.data).length === 0) {
         throw new Error("No price data available for the specified coins and currency");
       }
       const coins = await getCoinsData(runtime);
-      const formattedResponse = Object.entries(response.data)
-        .map(([coinId, data]) => {
-          const coin = coins.find((c) => c.id === coinId);
-          const coinName = coin ? `${coin.name} (${coin.symbol.toUpperCase()})` : coinId;
-          const parts = [`${coinName}:`];
-          for (const currency of currencies) {
-            const upperCurrency = currency.toUpperCase();
-            if (data[currency]) {
-              parts.push(
-                `  ${upperCurrency}: ${data[currency].toLocaleString(void 0, {
-                  style: "currency",
-                  currency,
-                })}`
-              );
-            }
-            if (content.include_market_cap) {
-              const marketCap = data[`${currency}_market_cap`];
-              if (marketCap !== void 0) {
-                parts.push(
-                  `  Market Cap (${upperCurrency}): ${marketCap.toLocaleString(void 0, {
-                    style: "currency",
-                    currency,
-                    maximumFractionDigits: 0,
-                  })}`
-                );
-              }
-            }
-            if (content.include_24hr_vol) {
-              const volume = data[`${currency}_24h_vol`];
-              if (volume !== void 0) {
-                parts.push(
-                  `  24h Volume (${upperCurrency}): ${volume.toLocaleString(void 0, {
-                    style: "currency",
-                    currency,
-                    maximumFractionDigits: 0,
-                  })}`
-                );
-              }
-            }
-            if (content.include_24hr_change) {
-              const change = data[`${currency}_24h_change`];
-              if (change !== void 0) {
-                const changePrefix = change >= 0 ? "+" : "";
-                parts.push(`  24h Change (${upperCurrency}): ${changePrefix}${change.toFixed(2)}%`);
-              }
+      const formattedResponse = Object.entries(response.data).map(([coinId, data]) => {
+        const coin = coins.find((c) => c.id === coinId);
+        const coinName = coin ? `${coin.name} (${coin.symbol.toUpperCase()})` : coinId;
+        const parts = [`${coinName}:`];
+        for (const currency of currencies) {
+          const upperCurrency = currency.toUpperCase();
+          if (data[currency]) {
+            parts.push(`  ${upperCurrency}: ${data[currency].toLocaleString(void 0, {
+              style: "currency",
+              currency
+            })}`);
+          }
+          if (content.include_market_cap) {
+            const marketCap = data[`${currency}_market_cap`];
+            if (marketCap !== void 0) {
+              parts.push(`  Market Cap (${upperCurrency}): ${marketCap.toLocaleString(void 0, {
+                style: "currency",
+                currency,
+                maximumFractionDigits: 0
+              })}`);
             }
           }
-          if (content.include_last_updated_at && data.last_updated_at) {
-            const lastUpdated = new Date(data.last_updated_at * 1e3).toLocaleString();
-            parts.push(`  Last Updated: ${lastUpdated}`);
+          if (content.include_24hr_vol) {
+            const volume = data[`${currency}_24h_vol`];
+            if (volume !== void 0) {
+              parts.push(`  24h Volume (${upperCurrency}): ${volume.toLocaleString(void 0, {
+                style: "currency",
+                currency,
+                maximumFractionDigits: 0
+              })}`);
+            }
           }
-          return parts.join("\n");
-        })
-        .filter(Boolean);
+          if (content.include_24hr_change) {
+            const change = data[`${currency}_24h_change`];
+            if (change !== void 0) {
+              const changePrefix = change >= 0 ? "+" : "";
+              parts.push(`  24h Change (${upperCurrency}): ${changePrefix}${change.toFixed(2)}%`);
+            }
+          }
+        }
+        if (content.include_last_updated_at && data.last_updated_at) {
+          const lastUpdated = new Date(data.last_updated_at * 1e3).toLocaleString();
+          parts.push(`  Last Updated: ${lastUpdated}`);
+        }
+        return parts.join("\n");
+      }).filter(Boolean);
       if (formattedResponse.length === 0) {
         throw new Error("Failed to format price data for the specified coins");
       }
@@ -4509,7 +4760,7 @@ var getPrice_default = {
                   marketCap: data[`${currency}_market_cap`],
                   volume24h: data[`${currency}_24h_vol`],
                   change24h: data[`${currency}_24h_change`],
-                  lastUpdated: data.last_updated_at,
+                  lastUpdated: data.last_updated_at
                 };
                 Object.assign(currencyAcc, { [currency]: currencyData });
                 return currencyAcc;
@@ -4522,9 +4773,9 @@ var getPrice_default = {
               include_market_cap: content.include_market_cap,
               include_24hr_vol: content.include_24hr_vol,
               include_24hr_change: content.include_24hr_change,
-              include_last_updated_at: content.include_last_updated_at,
-            },
-          },
+              include_last_updated_at: content.include_last_updated_at
+            }
+          }
         });
       }
       return true;
@@ -4545,8 +4796,8 @@ var getPrice_default = {
             error: error.message,
             statusCode: error.response?.status,
             params: error.config?.params,
-            requiresProPlan: error.response?.status === 403,
-          },
+            requiresProPlan: error.response?.status === 403
+          }
         });
       }
       return false;
@@ -4557,49 +4808,54 @@ var getPrice_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "What's the current price of Bitcoin?",
-        },
+          text: "What's the current price of Bitcoin?"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the current Bitcoin price for you.",
-          action: "GET_PRICE",
-        },
+          action: "GET_PRICE"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "The current price of Bitcoin is {{dynamic}} USD",
-        },
-      },
+          text: "The current price of Bitcoin is {{dynamic}} USD"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "Check ETH and BTC prices in EUR with market cap",
-        },
+          text: "Check ETH and BTC prices in EUR with market cap"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the current prices with market cap data.",
-          action: "GET_PRICE",
-        },
+          action: "GET_PRICE"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Bitcoin: EUR {{dynamic}} | Market Cap: \u20AC{{dynamic}}\nEthereum: EUR {{dynamic}} | Market Cap: \u20AC{{dynamic}}",
-        },
-      },
-    ],
-  ],
+          text: "Bitcoin: EUR {{dynamic}} | Market Cap: \u20AC{{dynamic}}\nEthereum: EUR {{dynamic}} | Market Cap: \u20AC{{dynamic}}"
+        }
+      }
+    ]
+  ]
 };
 
 // src/actions/getPricePerAddress.ts
-import { composeContext as composeContext3, elizaLogger as elizaLogger5, generateObject as generateObject3, ModelClass as ModelClass3 } from "@elizaos/core";
+import {
+  composeContext as composeContext3,
+  elizaLogger as elizaLogger5,
+  generateObject as generateObject3,
+  ModelClass as ModelClass3
+} from "@elizaos/core";
 import axios5 from "axios";
 
 // src/templates/priceAddress.ts
@@ -4659,14 +4915,18 @@ Based on the conversation above, use last question made and if the request is fo
 // src/actions/getPricePerAddress.ts
 var GetTokenPriceSchema = z.object({
   chainId: z.string(),
-  tokenAddress: z.string(),
+  tokenAddress: z.string()
 });
 var isGetTokenPriceContent = (obj) => {
   return GetTokenPriceSchema.safeParse(obj).success;
 };
 var getPricePerAddress_default = {
   name: "GET_TOKEN_PRICE_BY_ADDRESS",
-  similes: ["FETCH_TOKEN_PRICE_BY_ADDRESS", "CHECK_TOKEN_PRICE_BY_ADDRESS", "LOOKUP_TOKEN_BY_ADDRESS"],
+  similes: [
+    "FETCH_TOKEN_PRICE_BY_ADDRESS",
+    "CHECK_TOKEN_PRICE_BY_ADDRESS",
+    "LOOKUP_TOKEN_BY_ADDRESS"
+  ],
   // eslint-disable-next-line
   validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
@@ -4685,14 +4945,14 @@ var getPricePerAddress_default = {
       elizaLogger5.log("Composing token price context...");
       const context = composeContext3({
         state: currentState,
-        template: getPriceByAddressTemplate,
+        template: getPriceByAddressTemplate
       });
       elizaLogger5.log("Generating content from template...");
       const result = await generateObject3({
         runtime,
         context,
         modelClass: ModelClass3.SMALL,
-        schema: GetTokenPriceSchema,
+        schema: GetTokenPriceSchema
       });
       if (!isGetTokenPriceContent(result.object)) {
         elizaLogger5.error("Invalid token price request format");
@@ -4703,19 +4963,31 @@ var getPricePerAddress_default = {
       const config = await validateCoingeckoConfig(runtime);
       const { baseUrl, apiKey, headerKey } = getApiConfig(config);
       elizaLogger5.log("Fetching token data...");
-      const response = await axios5.get(`${baseUrl}/coins/${content.chainId}/contract/${content.tokenAddress}`, {
-        headers: {
-          accept: "application/json",
-          [headerKey]: apiKey,
-        },
-      });
+      const response = await axios5.get(
+        `${baseUrl}/coins/${content.chainId}/contract/${content.tokenAddress}`,
+        {
+          headers: {
+            accept: "application/json",
+            [headerKey]: apiKey
+          }
+        }
+      );
       const tokenData = response.data;
       if (!tokenData.market_data?.current_price?.usd) {
-        throw new Error(`No price data available for token ${content.tokenAddress} on ${content.chainId}`);
+        throw new Error(
+          `No price data available for token ${content.tokenAddress} on ${content.chainId}`
+        );
       }
-      const parts = [`${tokenData.name} (${tokenData.symbol.toUpperCase()})`, `Address: ${content.tokenAddress}`, `Chain: ${content.chainId}`, `Price: $${tokenData.market_data.current_price.usd.toFixed(6)} USD`];
+      const parts = [
+        `${tokenData.name} (${tokenData.symbol.toUpperCase()})`,
+        `Address: ${content.tokenAddress}`,
+        `Chain: ${content.chainId}`,
+        `Price: $${tokenData.market_data.current_price.usd.toFixed(6)} USD`
+      ];
       if (tokenData.market_data.market_cap?.usd) {
-        parts.push(`Market Cap: $${tokenData.market_data.market_cap.usd.toLocaleString()} USD`);
+        parts.push(
+          `Market Cap: $${tokenData.market_data.market_cap.usd.toLocaleString()} USD`
+        );
       }
       const responseText = parts.join("\n");
       elizaLogger5.success("Token price data retrieved successfully!");
@@ -4729,14 +5001,17 @@ var getPricePerAddress_default = {
               address: content.tokenAddress,
               chain: content.chainId,
               price: tokenData.market_data.current_price.usd,
-              marketCap: tokenData.market_data.market_cap?.usd,
-            },
-          },
+              marketCap: tokenData.market_data.market_cap?.usd
+            }
+          }
         });
       }
       return true;
     } catch (error) {
-      elizaLogger5.error("Error in GET_TOKEN_PRICE_BY_ADDRESS handler:", error);
+      elizaLogger5.error(
+        "Error in GET_TOKEN_PRICE_BY_ADDRESS handler:",
+        error
+      );
       let errorMessage;
       if (error.response?.status === 429) {
         errorMessage = "Rate limit exceeded. Please try again later.";
@@ -4753,8 +5028,8 @@ var getPricePerAddress_default = {
           content: {
             error: error.message,
             statusCode: error.response?.status,
-            requiresProPlan: error.response?.status === 403,
-          },
+            requiresProPlan: error.response?.status === 403
+          }
         });
       }
       return false;
@@ -4765,28 +5040,33 @@ var getPricePerAddress_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "What's the price of the USDC token on Ethereum? The address is 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-        },
+          text: "What's the price of the USDC token on Ethereum? The address is 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the USDC token price for you.",
-          action: "GET_TOKEN_PRICE_BY_ADDRESS",
-        },
+          action: "GET_TOKEN_PRICE_BY_ADDRESS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "USD Coin (USDC)\nAddress: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\nChain: ethereum\nPrice: {{dynamic}} USD\nMarket Cap: ${{dynamic}} USD",
-        },
-      },
-    ],
-  ],
+          text: "USD Coin (USDC)\nAddress: 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\nChain: ethereum\nPrice: {{dynamic}} USD\nMarket Cap: ${{dynamic}} USD"
+        }
+      }
+    ]
+  ]
 };
 
 // src/actions/getTopGainersLosers.ts
-import { composeContext as composeContext4, elizaLogger as elizaLogger6, generateObject as generateObject4, ModelClass as ModelClass4 } from "@elizaos/core";
+import {
+  composeContext as composeContext4,
+  elizaLogger as elizaLogger6,
+  generateObject as generateObject4,
+  ModelClass as ModelClass4
+} from "@elizaos/core";
 import axios6 from "axios";
 
 // src/templates/gainersLosers.ts
@@ -4846,14 +5126,20 @@ var DurationEnum = z.enum(["1h", "24h", "7d", "14d", "30d", "60d", "1y"]);
 var GetTopGainersLosersSchema = z.object({
   vs_currency: z.string().default("usd"),
   duration: DurationEnum.default("24h"),
-  top_coins: z.string().default("1000"),
+  top_coins: z.string().default("1000")
 });
 var isGetTopGainersLosersContent = (obj) => {
   return GetTopGainersLosersSchema.safeParse(obj).success;
 };
 var getTopGainersLosers_default = {
   name: "GET_TOP_GAINERS_LOSERS",
-  similes: ["TOP_MOVERS", "BIGGEST_GAINERS", "BIGGEST_LOSERS", "PRICE_CHANGES", "BEST_WORST_PERFORMERS"],
+  similes: [
+    "TOP_MOVERS",
+    "BIGGEST_GAINERS",
+    "BIGGEST_LOSERS",
+    "PRICE_CHANGES",
+    "BEST_WORST_PERFORMERS"
+  ],
   // eslint-disable-next-line
   validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
@@ -4872,14 +5158,14 @@ var getTopGainersLosers_default = {
       elizaLogger6.log("Composing gainers/losers context...");
       const context = composeContext4({
         state: currentState,
-        template: getTopGainersLosersTemplate,
+        template: getTopGainersLosersTemplate
       });
       elizaLogger6.log("Generating content from template...");
       const result = await generateObject4({
         runtime,
         context,
         modelClass: ModelClass4.LARGE,
-        schema: GetTopGainersLosersSchema,
+        schema: GetTopGainersLosersSchema
       });
       if (!isGetTopGainersLosersContent(result.object)) {
         elizaLogger6.error("Invalid gainers/losers request format");
@@ -4893,19 +5179,22 @@ var getTopGainersLosers_default = {
       elizaLogger6.log("API request params:", {
         vs_currency: content.vs_currency,
         duration: content.duration,
-        top_coins: content.top_coins,
+        top_coins: content.top_coins
       });
-      const response = await axios6.get(`${baseUrl}/coins/top_gainers_losers`, {
-        headers: {
-          accept: "application/json",
-          [headerKey]: apiKey,
-        },
-        params: {
-          vs_currency: content.vs_currency,
-          duration: content.duration,
-          top_coins: content.top_coins,
-        },
-      });
+      const response = await axios6.get(
+        `${baseUrl}/coins/top_gainers_losers`,
+        {
+          headers: {
+            "accept": "application/json",
+            [headerKey]: apiKey
+          },
+          params: {
+            vs_currency: content.vs_currency,
+            duration: content.duration,
+            top_coins: content.top_coins
+          }
+        }
+      );
       if (!response.data) {
         throw new Error("No data received from CoinGecko API");
       }
@@ -4922,7 +5211,7 @@ var getTopGainersLosers_default = {
           const changeKey = `usd_${content.duration}_change`;
           const change = coin[changeKey];
           return `${index + 1}. ${coin.name} (${coin.symbol.toUpperCase()}) | $${coin.usd.toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 8 })} | ${change >= 0 ? "+" : ""}${change.toFixed(2)}%${coin.market_cap_rank ? ` | Rank #${coin.market_cap_rank}` : ""}`;
-        }),
+        })
       ].join("\n");
       if (callback) {
         callback({
@@ -4932,9 +5221,9 @@ var getTopGainersLosers_default = {
             params: {
               vs_currency: content.vs_currency,
               duration: content.duration,
-              top_coins: content.top_coins,
-            },
-          },
+              top_coins: content.top_coins
+            }
+          }
         });
       }
       return true;
@@ -4957,8 +5246,8 @@ var getTopGainersLosers_default = {
             error: error.message,
             statusCode: error.response?.status,
             params: error.config?.params,
-            requiresProPlan: error.response?.status === 403,
-          },
+            requiresProPlan: error.response?.status === 403
+          }
         });
       }
       return false;
@@ -4969,49 +5258,54 @@ var getTopGainersLosers_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "What are the top gaining and losing cryptocurrencies?",
-        },
+          text: "What are the top gaining and losing cryptocurrencies?"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the top gainers and losers for you.",
-          action: "GET_TOP_GAINERS_LOSERS",
-        },
+          action: "GET_TOP_GAINERS_LOSERS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the top gainers and losers:\nTop Gainers:\n1. Bitcoin (BTC) | $45,000 | +5.2% | Rank #1\n{{dynamic}}",
-        },
-      },
+          text: "Here are the top gainers and losers:\nTop Gainers:\n1. Bitcoin (BTC) | $45,000 | +5.2% | Rank #1\n{{dynamic}}"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "Show me the best and worst performing crypto today",
-        },
+          text: "Show me the best and worst performing crypto today"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll fetch the current top movers in the crypto market.",
-          action: "GET_TOP_GAINERS_LOSERS",
-        },
+          action: "GET_TOP_GAINERS_LOSERS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are today's best and worst performers:\n{{dynamic}}",
-        },
-      },
-    ],
-  ],
+          text: "Here are today's best and worst performers:\n{{dynamic}}"
+        }
+      }
+    ]
+  ]
 };
 
 // src/actions/getTrending.ts
-import { composeContext as composeContext5, elizaLogger as elizaLogger7, generateObject as generateObject5, ModelClass as ModelClass5 } from "@elizaos/core";
+import {
+  composeContext as composeContext5,
+  elizaLogger as elizaLogger7,
+  generateObject as generateObject5,
+  ModelClass as ModelClass5
+} from "@elizaos/core";
 import axios7 from "axios";
 
 // src/templates/trending.ts
@@ -5055,14 +5349,20 @@ Based on the conversation above, if the request is for trending market data, ext
 // src/actions/getTrending.ts
 var GetTrendingSchema = z.object({
   include_nfts: z.boolean().default(true),
-  include_categories: z.boolean().default(true),
+  include_categories: z.boolean().default(true)
 });
 var isGetTrendingContent = (obj) => {
   return GetTrendingSchema.safeParse(obj).success;
 };
 var getTrending_default = {
   name: "GET_TRENDING",
-  similes: ["TRENDING_COINS", "TRENDING_CRYPTO", "HOT_COINS", "POPULAR_COINS", "TRENDING_SEARCH"],
+  similes: [
+    "TRENDING_COINS",
+    "TRENDING_CRYPTO",
+    "HOT_COINS",
+    "POPULAR_COINS",
+    "TRENDING_SEARCH"
+  ],
   // eslint-disable-next-line
   validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
@@ -5081,13 +5381,13 @@ var getTrending_default = {
       elizaLogger7.log("Composing trending context...");
       const trendingContext = composeContext5({
         state: currentState,
-        template: getTrendingTemplate,
+        template: getTrendingTemplate
       });
       const result = await generateObject5({
         runtime,
         context: trendingContext,
         modelClass: ModelClass5.LARGE,
-        schema: GetTrendingSchema,
+        schema: GetTrendingSchema
       });
       if (!isGetTrendingContent(result.object)) {
         elizaLogger7.error("Invalid trending request format");
@@ -5096,11 +5396,14 @@ var getTrending_default = {
       const config = await validateCoingeckoConfig(runtime);
       const { baseUrl, apiKey, headerKey } = getApiConfig(config);
       elizaLogger7.log("Fetching trending data...");
-      const response = await axios7.get(`${baseUrl}/search/trending`, {
-        headers: {
-          [headerKey]: apiKey,
-        },
-      });
+      const response = await axios7.get(
+        `${baseUrl}/search/trending`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
       if (!response.data) {
         throw new Error("No data received from CoinGecko API");
       }
@@ -5111,28 +5414,30 @@ var getTrending_default = {
           marketCapRank: item.market_cap_rank,
           id: item.id,
           thumbnail: item.thumb,
-          largeImage: item.large,
+          largeImage: item.large
         })),
         nfts: response.data.nfts.map((nft) => ({
           name: nft.name,
           symbol: nft.symbol,
           id: nft.id,
-          thumbnail: nft.thumb,
+          thumbnail: nft.thumb
         })),
         categories: response.data.categories.map((category) => ({
           name: category.name,
-          id: category.id,
-        })),
+          id: category.id
+        }))
       };
       const responseText = [
         "Trending Coins:",
-        ...formattedData.coins.map((coin, index) => `${index + 1}. ${coin.name} (${coin.symbol})${coin.marketCapRank ? ` - Rank #${coin.marketCapRank}` : ""}`),
+        ...formattedData.coins.map(
+          (coin, index) => `${index + 1}. ${coin.name} (${coin.symbol})${coin.marketCapRank ? ` - Rank #${coin.marketCapRank}` : ""}`
+        ),
         "",
         "Trending NFTs:",
-        ...(formattedData.nfts.length ? formattedData.nfts.map((nft, index) => `${index + 1}. ${nft.name} (${nft.symbol})`) : ["No trending NFTs available"]),
+        ...formattedData.nfts.length ? formattedData.nfts.map((nft, index) => `${index + 1}. ${nft.name} (${nft.symbol})`) : ["No trending NFTs available"],
         "",
         "Trending Categories:",
-        ...(formattedData.categories.length ? formattedData.categories.map((category, index) => `${index + 1}. ${category.name}`) : ["No trending categories available"]),
+        ...formattedData.categories.length ? formattedData.categories.map((category, index) => `${index + 1}. ${category.name}`) : ["No trending categories available"]
       ].join("\n");
       elizaLogger7.success("Trending data retrieved successfully!");
       if (callback) {
@@ -5140,8 +5445,8 @@ var getTrending_default = {
           text: responseText,
           content: {
             trending: formattedData,
-            timestamp: /* @__PURE__ */ new Date().toISOString(),
-          },
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
         });
       }
       return true;
@@ -5153,8 +5458,8 @@ var getTrending_default = {
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status,
-          },
+            statusCode: error.response?.status
+          }
         });
       }
       return false;
@@ -5165,49 +5470,54 @@ var getTrending_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "What are the trending cryptocurrencies?",
-        },
+          text: "What are the trending cryptocurrencies?"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the trending cryptocurrencies for you.",
-          action: "GET_TRENDING",
-        },
+          action: "GET_TRENDING"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the trending cryptocurrencies:\n1. Bitcoin (BTC) - Rank #1\n2. Ethereum (ETH) - Rank #2\n{{dynamic}}",
-        },
-      },
+          text: "Here are the trending cryptocurrencies:\n1. Bitcoin (BTC) - Rank #1\n2. Ethereum (ETH) - Rank #2\n{{dynamic}}"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "Show me what's hot in crypto right now",
-        },
+          text: "Show me what's hot in crypto right now"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll fetch the current trending cryptocurrencies.",
-          action: "GET_TRENDING",
-        },
+          action: "GET_TRENDING"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the trending cryptocurrencies:\n{{dynamic}}",
-        },
-      },
-    ],
-  ],
+          text: "Here are the trending cryptocurrencies:\n{{dynamic}}"
+        }
+      }
+    ]
+  ]
 };
 
 // src/actions/getTrendingPools.ts
-import { composeContext as composeContext6, elizaLogger as elizaLogger8, generateObject as generateObject6, ModelClass as ModelClass6 } from "@elizaos/core";
+import {
+  composeContext as composeContext6,
+  elizaLogger as elizaLogger8,
+  generateObject as generateObject6,
+  ModelClass as ModelClass6
+} from "@elizaos/core";
 import axios8 from "axios";
 
 // src/templates/trendingPools.ts
@@ -5243,7 +5553,7 @@ You are replying to: {{message}}
 
 // src/actions/getTrendingPools.ts
 var GetTrendingPoolsSchema = z.object({
-  limit: z.number().min(1).max(100).default(10),
+  limit: z.number().min(1).max(100).default(10)
 });
 var isGetTrendingPoolsContent = (obj) => {
   return GetTrendingPoolsSchema.safeParse(obj).success;
@@ -5268,13 +5578,13 @@ var getTrendingPools_default = {
       elizaLogger8.log("Composing trending pools context...");
       const trendingContext = composeContext6({
         state: currentState,
-        template: getTrendingPoolsTemplate,
+        template: getTrendingPoolsTemplate
       });
       const result = await generateObject6({
         runtime,
         context: trendingContext,
         modelClass: ModelClass6.LARGE,
-        schema: GetTrendingPoolsSchema,
+        schema: GetTrendingPoolsSchema
       });
       if (!isGetTrendingPoolsContent(result.object)) {
         elizaLogger8.error("Invalid trending pools request format");
@@ -5283,39 +5593,61 @@ var getTrendingPools_default = {
       const config = await validateCoingeckoConfig(runtime);
       const { baseUrl, apiKey, headerKey } = getApiConfig(config);
       elizaLogger8.log("Fetching trending pools data...");
-      const response = await axios8.get(`${baseUrl}/onchain/networks/trending_pools?include=base_token,dex`, {
-        headers: {
-          [headerKey]: apiKey,
-        },
-      });
+      const response = await axios8.get(
+        `${baseUrl}/onchain/networks/trending_pools?include=base_token,dex`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
       if (!response.data) {
         throw new Error("No data received from CoinGecko API");
       }
       const formattedData = response.data.data.map((pool) => ({
         name: pool.attributes.name,
-        marketCap: Number(pool.attributes.market_cap_usd).toLocaleString("en-US", {
+        marketCap: Number(
+          pool.attributes.market_cap_usd
+        ).toLocaleString("en-US", {
           style: "currency",
-          currency: "USD",
+          currency: "USD"
         }),
         fdv: Number(pool.attributes.fdv_usd).toLocaleString("en-US", {
           style: "currency",
-          currency: "USD",
+          currency: "USD"
         }),
-        reserveUSD: Number(pool.attributes.reserve_in_usd).toLocaleString("en-US", {
+        reserveUSD: Number(
+          pool.attributes.reserve_in_usd
+        ).toLocaleString("en-US", {
           style: "currency",
-          currency: "USD",
+          currency: "USD"
         }),
-        createdAt: new Date(pool.attributes.pool_created_at).toLocaleDateString(),
+        createdAt: new Date(
+          pool.attributes.pool_created_at
+        ).toLocaleDateString()
       }));
-      const responseText = ["Trending Pools Overview:", "", ...formattedData.map((pool, index) => [`${index + 1}. ${pool.name}`, `   Market Cap: ${pool.marketCap}`, `   FDV: ${pool.fdv}`, `   Reserve: ${pool.reserveUSD}`, `   Created: ${pool.createdAt}`, ""].join("\n"))].join("\n");
+      const responseText = [
+        "Trending Pools Overview:",
+        "",
+        ...formattedData.map(
+          (pool, index) => [
+            `${index + 1}. ${pool.name}`,
+            `   Market Cap: ${pool.marketCap}`,
+            `   FDV: ${pool.fdv}`,
+            `   Reserve: ${pool.reserveUSD}`,
+            `   Created: ${pool.createdAt}`,
+            ""
+          ].join("\n")
+        )
+      ].join("\n");
       elizaLogger8.success("Trending pools data retrieved successfully!");
       if (callback) {
         callback({
           text: responseText,
           content: {
             trendingPools: formattedData,
-            timestamp: /* @__PURE__ */ new Date().toISOString(),
-          },
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
         });
       }
       return true;
@@ -5327,8 +5659,8 @@ var getTrendingPools_default = {
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status,
-          },
+            statusCode: error.response?.status
+          }
         });
       }
       return false;
@@ -5339,70 +5671,75 @@ var getTrendingPools_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "Show me trending liquidity pools",
-        },
+          text: "Show me trending liquidity pools"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the trending liquidity pools for you.",
-          action: "GET_TRENDING_POOLS",
-        },
+          action: "GET_TRENDING_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the trending liquidity pools:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025",
-        },
-      },
+          text: "Here are the trending liquidity pools:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "What are the top hottest dex pools?",
-        },
+          text: "What are the top hottest dex pools?"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll fetch the top hottest DEX pools for you.",
-          action: "GET_TRENDING_POOLS",
-        },
+          action: "GET_TRENDING_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the top 5 hottest DEX pools:\n1. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025\n2. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025",
-        },
-      },
+          text: "Here are the top 5 hottest DEX pools:\n1. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025\n2. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "List all trading pools with highest volume",
-        },
+          text: "List all trading pools with highest volume"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll get all the trending trading pools for you.",
-          action: "GET_TRENDING_POOLS",
-        },
+          action: "GET_TRENDING_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are all trending trading pools:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025",
-        },
-      },
-    ],
-  ],
+          text: "Here are all trending trading pools:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025"
+        }
+      }
+    ]
+  ]
 };
 
 // src/actions/getNewlyListed.ts
-import { composeContext as composeContext7, elizaLogger as elizaLogger9, generateObject as generateObject7, ModelClass as ModelClass7 } from "@elizaos/core";
+import {
+  composeContext as composeContext7,
+  elizaLogger as elizaLogger9,
+  generateObject as generateObject7,
+  ModelClass as ModelClass7
+} from "@elizaos/core";
 import axios9 from "axios";
 
 // src/templates/newCoins.ts
@@ -5438,14 +5775,19 @@ You are replying to: {{message}}
 
 // src/actions/getNewlyListed.ts
 var GetNewCoinsSchema = z.object({
-  limit: z.number().min(1).max(50).default(10),
+  limit: z.number().min(1).max(50).default(10)
 });
 var isGetNewCoinsContent = (obj) => {
   return GetNewCoinsSchema.safeParse(obj).success;
 };
 var getNewlyListed_default = {
   name: "GET_NEW_COINS",
-  similes: ["NEW_COINS", "RECENTLY_ADDED", "NEW_LISTINGS", "LATEST_COINS"],
+  similes: [
+    "NEW_COINS",
+    "RECENTLY_ADDED",
+    "NEW_LISTINGS",
+    "LATEST_COINS"
+  ],
   validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
     return true;
@@ -5463,13 +5805,13 @@ var getNewlyListed_default = {
       elizaLogger9.log("Composing new coins context...");
       const newCoinsContext = composeContext7({
         state: currentState,
-        template: getNewCoinsTemplate,
+        template: getNewCoinsTemplate
       });
       const result = await generateObject7({
         runtime,
         context: newCoinsContext,
         modelClass: ModelClass7.LARGE,
-        schema: GetNewCoinsSchema,
+        schema: GetNewCoinsSchema
       });
       if (!isGetNewCoinsContent(result.object)) {
         elizaLogger9.error("Invalid new coins request format");
@@ -5478,11 +5820,14 @@ var getNewlyListed_default = {
       const config = await validateCoingeckoConfig(runtime);
       const { baseUrl, apiKey, headerKey } = getApiConfig(config);
       elizaLogger9.log("Fetching new coins data...");
-      const response = await axios9.get(`${baseUrl}/coins/list/new`, {
-        headers: {
-          [headerKey]: apiKey,
-        },
-      });
+      const response = await axios9.get(
+        `${baseUrl}/coins/list/new`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
       if (!response.data) {
         throw new Error("No data received from CoinGecko API");
       }
@@ -5494,8 +5839,8 @@ var getNewlyListed_default = {
           month: "long",
           day: "numeric",
           hour: "2-digit",
-          minute: "2-digit",
-        }),
+          minute: "2-digit"
+        })
       }));
       const responseText = [
         "Recently Added Coins:",
@@ -5503,7 +5848,7 @@ var getNewlyListed_default = {
         ...formattedData.map(
           (coin, index) => `${index + 1}. ${coin.name} (${coin.symbol})
    Listed: ${coin.activatedAt}`
-        ),
+        )
       ].join("\n");
       elizaLogger9.success("New coins data retrieved successfully!");
       if (callback) {
@@ -5511,8 +5856,8 @@ var getNewlyListed_default = {
           text: responseText,
           content: {
             newCoins: formattedData,
-            timestamp: /* @__PURE__ */ new Date().toISOString(),
-          },
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
         });
       }
       return true;
@@ -5524,8 +5869,8 @@ var getNewlyListed_default = {
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status,
-          },
+            statusCode: error.response?.status
+          }
         });
       }
       return false;
@@ -5536,28 +5881,33 @@ var getNewlyListed_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "What are the newest coins listed?",
-        },
+          text: "What are the newest coins listed?"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the recently added coins for you.",
-          action: "GET_NEW_COINS",
-        },
+          action: "GET_NEW_COINS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the recently added coins:\n1. Verb Ai (VERB)\n   Listed: January 20, 2025, 12:31 PM\n{{dynamic}}",
-        },
-      },
-    ],
-  ],
+          text: "Here are the recently added coins:\n1. Verb Ai (VERB)\n   Listed: January 20, 2025, 12:31 PM\n{{dynamic}}"
+        }
+      }
+    ]
+  ]
 };
 
 // src/actions/getNetworkTrendingPools.ts
-import { composeContext as composeContext8, elizaLogger as elizaLogger11, generateObject as generateObject8, ModelClass as ModelClass8 } from "@elizaos/core";
+import {
+  composeContext as composeContext8,
+  elizaLogger as elizaLogger11,
+  generateObject as generateObject8,
+  ModelClass as ModelClass8
+} from "@elizaos/core";
 import axios11 from "axios";
 
 // src/templates/networkTrendingPools.ts
@@ -5600,7 +5950,9 @@ You are replying to: {{message}}
 `;
 
 // src/providers/networkProvider.ts
-import { elizaLogger as elizaLogger10 } from "@elizaos/core";
+import {
+  elizaLogger as elizaLogger10
+} from "@elizaos/core";
 import axios10 from "axios";
 var CACHE_KEY3 = "coingecko:networks";
 var CACHE_TTL3 = 30 * 60;
@@ -5608,14 +5960,17 @@ var MAX_RETRIES3 = 3;
 async function fetchNetworks(runtime) {
   const config = await validateCoingeckoConfig(runtime);
   const { baseUrl, apiKey, headerKey } = getApiConfig(config);
-  const response = await axios10.get(`${baseUrl}/onchain/networks`, {
-    headers: {
-      accept: "application/json",
-      [headerKey]: apiKey,
-    },
-    timeout: 5e3,
-    // 5 second timeout
-  });
+  const response = await axios10.get(
+    `${baseUrl}/onchain/networks`,
+    {
+      headers: {
+        accept: "application/json",
+        [headerKey]: apiKey
+      },
+      timeout: 5e3
+      // 5 second timeout
+    }
+  );
   if (!response.data?.data?.length) {
     throw new Error("Invalid networks data received");
   }
@@ -5642,7 +5997,7 @@ async function getNetworks(runtime) {
     }
     const networks = await fetchWithRetry3(runtime);
     await runtime.cacheManager.set(CACHE_KEY3, networks, {
-      expires: CACHE_TTL3,
+      expires: CACHE_TTL3
     });
     return networks;
   } catch (error) {
@@ -5674,7 +6029,7 @@ var networksProvider = {
       elizaLogger10.error("Networks provider error:", error);
       return "Blockchain networks list is temporarily unavailable. Please try again later.";
     }
-  },
+  }
 };
 async function getNetworksData(runtime) {
   return getNetworks(runtime);
@@ -5683,21 +6038,27 @@ async function getNetworksData(runtime) {
 // src/actions/getNetworkTrendingPools.ts
 var GetNetworkTrendingPoolsSchema = z.object({
   networkId: z.string(),
-  limit: z.number().min(1).max(100).default(10),
+  limit: z.number().min(1).max(100).default(10)
 });
 var isGetNetworkTrendingPoolsContent = (obj) => {
   return GetNetworkTrendingPoolsSchema.safeParse(obj).success;
 };
 var getNetworkTrendingPools_default = {
   name: "GET_NETWORK_TRENDING_POOLS",
-  similes: ["NETWORK_TRENDING_POOLS", "CHAIN_HOT_POOLS", "BLOCKCHAIN_POPULAR_POOLS"],
+  similes: [
+    "NETWORK_TRENDING_POOLS",
+    "CHAIN_HOT_POOLS",
+    "BLOCKCHAIN_POPULAR_POOLS"
+  ],
   validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
     return true;
   },
   description: "Get list of trending pools for a specific network from CoinGecko's onchain data",
   handler: async (runtime, message, state, _options, callback) => {
-    elizaLogger11.log("Starting CoinGecko GET_NETWORK_TRENDING_POOLS handler...");
+    elizaLogger11.log(
+      "Starting CoinGecko GET_NETWORK_TRENDING_POOLS handler..."
+    );
     let currentState = state;
     if (!currentState) {
       currentState = await runtime.composeState(message);
@@ -5708,16 +6069,18 @@ var getNetworkTrendingPools_default = {
       elizaLogger11.log("Composing network trending pools context...");
       const trendingContext = composeContext8({
         state: currentState,
-        template: getNetworkTrendingPoolsTemplate,
+        template: getNetworkTrendingPoolsTemplate
       });
       const result = await generateObject8({
         runtime,
         context: trendingContext,
         modelClass: ModelClass8.LARGE,
-        schema: GetNetworkTrendingPoolsSchema,
+        schema: GetNetworkTrendingPoolsSchema
       });
       if (!isGetNetworkTrendingPoolsContent(result.object)) {
-        elizaLogger11.error("Invalid network trending pools request format");
+        elizaLogger11.error(
+          "Invalid network trending pools request format"
+        );
         return false;
       }
       const networks = await getNetworksData(runtime);
@@ -5726,37 +6089,68 @@ var getNetworkTrendingPools_default = {
         return n.id.toLowerCase() === searchTerm || n.attributes.name.toLowerCase().includes(searchTerm) || n.attributes.coingecko_asset_platform_id.toLowerCase() === searchTerm;
       });
       if (!network) {
-        throw new Error(`Network ${result.object.networkId} not found in available networks`);
+        throw new Error(
+          `Network ${result.object.networkId} not found in available networks`
+        );
       }
       const config = await validateCoingeckoConfig(runtime);
       const { baseUrl, apiKey, headerKey } = getApiConfig(config);
-      elizaLogger11.log(`Fetching trending pools data for network: ${network.id}`);
-      const response = await axios11.get(`${baseUrl}/onchain/networks/${network.id}/trending_pools?include=base_token,dex`, {
-        headers: {
-          [headerKey]: apiKey,
-        },
-      });
+      elizaLogger11.log(
+        `Fetching trending pools data for network: ${network.id}`
+      );
+      const response = await axios11.get(
+        `${baseUrl}/onchain/networks/${network.id}/trending_pools?include=base_token,dex`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
       if (!response.data) {
         throw new Error("No data received from CoinGecko API");
       }
       const formattedData = response.data.data.slice(0, result.object.limit).map((pool) => ({
         name: pool.attributes.name,
-        marketCap: Number(pool.attributes.market_cap_usd).toLocaleString("en-US", {
+        marketCap: Number(
+          pool.attributes.market_cap_usd
+        ).toLocaleString("en-US", {
           style: "currency",
-          currency: "USD",
+          currency: "USD"
         }),
-        fdv: Number(pool.attributes.fdv_usd).toLocaleString("en-US", {
+        fdv: Number(pool.attributes.fdv_usd).toLocaleString(
+          "en-US",
+          {
+            style: "currency",
+            currency: "USD"
+          }
+        ),
+        reserveUSD: Number(
+          pool.attributes.reserve_in_usd
+        ).toLocaleString("en-US", {
           style: "currency",
-          currency: "USD",
+          currency: "USD"
         }),
-        reserveUSD: Number(pool.attributes.reserve_in_usd).toLocaleString("en-US", {
-          style: "currency",
-          currency: "USD",
-        }),
-        createdAt: new Date(pool.attributes.pool_created_at).toLocaleDateString(),
+        createdAt: new Date(
+          pool.attributes.pool_created_at
+        ).toLocaleDateString()
       }));
-      const responseText = [`Trending Pools Overview for ${network.attributes.name}:`, "", ...formattedData.map((pool, index) => [`${index + 1}. ${pool.name}`, `   Market Cap: ${pool.marketCap}`, `   FDV: ${pool.fdv}`, `   Reserve: ${pool.reserveUSD}`, `   Created: ${pool.createdAt}`, ""].join("\n"))].join("\n");
-      elizaLogger11.success("Network trending pools data retrieved successfully!");
+      const responseText = [
+        `Trending Pools Overview for ${network.attributes.name}:`,
+        "",
+        ...formattedData.map(
+          (pool, index) => [
+            `${index + 1}. ${pool.name}`,
+            `   Market Cap: ${pool.marketCap}`,
+            `   FDV: ${pool.fdv}`,
+            `   Reserve: ${pool.reserveUSD}`,
+            `   Created: ${pool.createdAt}`,
+            ""
+          ].join("\n")
+        )
+      ].join("\n");
+      elizaLogger11.success(
+        "Network trending pools data retrieved successfully!"
+      );
       if (callback) {
         callback({
           text: responseText,
@@ -5764,21 +6158,24 @@ var getNetworkTrendingPools_default = {
             networkId: network.id,
             networkName: network.attributes.name,
             trendingPools: formattedData,
-            timestamp: /* @__PURE__ */ new Date().toISOString(),
-          },
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
         });
       }
       return true;
     } catch (error) {
-      elizaLogger11.error("Error in GET_NETWORK_TRENDING_POOLS handler:", error);
+      elizaLogger11.error(
+        "Error in GET_NETWORK_TRENDING_POOLS handler:",
+        error
+      );
       const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending pools data: ${error.message}`;
       if (callback) {
         callback({
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status,
-          },
+            statusCode: error.response?.status
+          }
         });
       }
       return false;
@@ -5789,70 +6186,75 @@ var getNetworkTrendingPools_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "Show me trending liquidity pools on Solana",
-        },
+          text: "Show me trending liquidity pools on Solana"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the trending Solana liquidity pools for you.",
-          action: "GET_NETWORK_TRENDING_POOLS",
-        },
+          action: "GET_NETWORK_TRENDING_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the trending pools on SOLANA:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025",
-        },
-      },
+          text: "Here are the trending pools on SOLANA:\n1. MELANIA / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. TRUMP / USDC\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "What are the top 5 hottest pools on Ethereum?",
-        },
+          text: "What are the top 5 hottest pools on Ethereum?"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll fetch the top 5 hottest pools on Ethereum for you.",
-          action: "GET_NETWORK_TRENDING_POOLS",
-        },
+          action: "GET_NETWORK_TRENDING_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the top 5 trending pools on ETHEREUM:\n1. PEPE / WETH\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025",
-        },
-      },
+          text: "Here are the top 5 trending pools on ETHEREUM:\n1. PEPE / WETH\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "List all BSC pools with highest volume",
-        },
+          text: "List all BSC pools with highest volume"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll get all the trending pools on BSC for you.",
-          action: "GET_NETWORK_TRENDING_POOLS",
-        },
+          action: "GET_NETWORK_TRENDING_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are all trending pools on BSC:\n1. CAKE / WBNB\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025",
-        },
-      },
-    ],
-  ],
+          text: "Here are all trending pools on BSC:\n1. CAKE / WBNB\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
+    ]
+  ]
 };
 
 // src/actions/getNetworkNewPools.ts
-import { composeContext as composeContext9, elizaLogger as elizaLogger12, generateObject as generateObject9, ModelClass as ModelClass9 } from "@elizaos/core";
+import {
+  composeContext as composeContext9,
+  elizaLogger as elizaLogger12,
+  generateObject as generateObject9,
+  ModelClass as ModelClass9
+} from "@elizaos/core";
 import axios12 from "axios";
 
 // src/templates/networkNewPools.ts
@@ -5897,14 +6299,20 @@ You are replying to: {{message}}
 // src/actions/getNetworkNewPools.ts
 var GetNetworkNewPoolsSchema = z.object({
   networkId: z.string(),
-  limit: z.number().min(1).max(100).default(10),
+  limit: z.number().min(1).max(100).default(10)
 });
 var isGetNetworkNewPoolsContent = (obj) => {
   return GetNetworkNewPoolsSchema.safeParse(obj).success;
 };
 var getNetworkNewPools_default = {
   name: "GET_NETWORK_NEW_POOLS",
-  similes: ["NETWORK_NEW_POOLS", "CHAIN_NEW_POOLS", "NEW_POOLS_BY_NETWORK", "RECENT_POOLS", "LATEST_POOLS"],
+  similes: [
+    "NETWORK_NEW_POOLS",
+    "CHAIN_NEW_POOLS",
+    "NEW_POOLS_BY_NETWORK",
+    "RECENT_POOLS",
+    "LATEST_POOLS"
+  ],
   validate: async (runtime, _message) => {
     await validateCoingeckoConfig(runtime);
     return true;
@@ -5922,13 +6330,13 @@ var getNetworkNewPools_default = {
       elizaLogger12.log("Composing network new pools context...");
       const newPoolsContext = composeContext9({
         state: currentState,
-        template: getNetworkNewPoolsTemplate,
+        template: getNetworkNewPoolsTemplate
       });
       const result = await generateObject9({
         runtime,
         context: newPoolsContext,
         modelClass: ModelClass9.LARGE,
-        schema: GetNetworkNewPoolsSchema,
+        schema: GetNetworkNewPoolsSchema
       });
       if (!isGetNetworkNewPoolsContent(result.object)) {
         elizaLogger12.error("Invalid network new pools request format");
@@ -5941,37 +6349,68 @@ var getNetworkNewPools_default = {
         return n.id.toLowerCase() === searchTerm || n.attributes.name.toLowerCase().includes(searchTerm) || n.attributes.coingecko_asset_platform_id.toLowerCase() === searchTerm;
       });
       if (!network) {
-        throw new Error(`Network ${result.object.networkId} not found in available networks`);
+        throw new Error(
+          `Network ${result.object.networkId} not found in available networks`
+        );
       }
       const config = await validateCoingeckoConfig(runtime);
       const { baseUrl, apiKey, headerKey } = getApiConfig(config);
-      elizaLogger12.log(`Fetching new pools data for network: ${network.id}`);
-      const response = await axios12.get(`${baseUrl}/onchain/networks/${network.id}/new_pools?include=base_token,dex`, {
-        headers: {
-          [headerKey]: apiKey,
-        },
-      });
+      elizaLogger12.log(
+        `Fetching new pools data for network: ${network.id}`
+      );
+      const response = await axios12.get(
+        `${baseUrl}/onchain/networks/${network.id}/new_pools?include=base_token,dex`,
+        {
+          headers: {
+            [headerKey]: apiKey
+          }
+        }
+      );
       if (!response.data) {
         throw new Error("No data received from CoinGecko API");
       }
       const formattedData = response.data.data.slice(0, result.object.limit).map((pool) => ({
         name: pool.attributes.name,
-        marketCap: Number(pool.attributes.market_cap_usd).toLocaleString("en-US", {
+        marketCap: Number(
+          pool.attributes.market_cap_usd
+        ).toLocaleString("en-US", {
           style: "currency",
-          currency: "USD",
+          currency: "USD"
         }),
-        fdv: Number(pool.attributes.fdv_usd).toLocaleString("en-US", {
+        fdv: Number(pool.attributes.fdv_usd).toLocaleString(
+          "en-US",
+          {
+            style: "currency",
+            currency: "USD"
+          }
+        ),
+        reserveUSD: Number(
+          pool.attributes.reserve_in_usd
+        ).toLocaleString("en-US", {
           style: "currency",
-          currency: "USD",
+          currency: "USD"
         }),
-        reserveUSD: Number(pool.attributes.reserve_in_usd).toLocaleString("en-US", {
-          style: "currency",
-          currency: "USD",
-        }),
-        createdAt: new Date(pool.attributes.pool_created_at).toLocaleDateString(),
+        createdAt: new Date(
+          pool.attributes.pool_created_at
+        ).toLocaleDateString()
       }));
-      const responseText = [`New Pools Overview for ${network.attributes.name}:`, "", ...formattedData.map((pool, index) => [`${index + 1}. ${pool.name}`, `   Market Cap: ${pool.marketCap}`, `   FDV: ${pool.fdv}`, `   Reserve: ${pool.reserveUSD}`, `   Created: ${pool.createdAt}`, ""].join("\n"))].join("\n");
-      elizaLogger12.success("Network new pools data retrieved successfully!");
+      const responseText = [
+        `New Pools Overview for ${network.attributes.name}:`,
+        "",
+        ...formattedData.map(
+          (pool, index) => [
+            `${index + 1}. ${pool.name}`,
+            `   Market Cap: ${pool.marketCap}`,
+            `   FDV: ${pool.fdv}`,
+            `   Reserve: ${pool.reserveUSD}`,
+            `   Created: ${pool.createdAt}`,
+            ""
+          ].join("\n")
+        )
+      ].join("\n");
+      elizaLogger12.success(
+        "Network new pools data retrieved successfully!"
+      );
       if (callback) {
         callback({
           text: responseText,
@@ -5979,8 +6418,8 @@ var getNetworkNewPools_default = {
             networkId: network.id,
             networkName: network.attributes.name,
             newPools: formattedData,
-            timestamp: /* @__PURE__ */ new Date().toISOString(),
-          },
+            timestamp: (/* @__PURE__ */ new Date()).toISOString()
+          }
         });
       }
       return true;
@@ -5992,8 +6431,8 @@ var getNetworkNewPools_default = {
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status,
-          },
+            statusCode: error.response?.status
+          }
         });
       }
       return false;
@@ -6004,76 +6443,89 @@ var getNetworkNewPools_default = {
       {
         user: "{{user1}}",
         content: {
-          text: "Show me new liquidity pools on Ethereum",
-        },
+          text: "Show me new liquidity pools on Ethereum"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll check the new Ethereum liquidity pools for you.",
-          action: "GET_NETWORK_NEW_POOLS",
-        },
+          action: "GET_NETWORK_NEW_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the new pools on ETHEREUM:\n1. PEPE / WETH\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. SUSHI / WETH\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025",
-        },
-      },
+          text: "Here are the new pools on ETHEREUM:\n1. PEPE / WETH\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025\n2. SUSHI / WETH\n   Market Cap: $8,844,297,825\n   FDV: $43,874,068,484\n   Reserve: $718,413,745\n   Created: 1/17/2025"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "What are the 5 latest pools on BSC?",
-        },
+          text: "What are the 5 latest pools on BSC?"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll fetch the 5 latest pools on BSC for you.",
-          action: "GET_NETWORK_NEW_POOLS",
-        },
+          action: "GET_NETWORK_NEW_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are the 5 newest pools on BSC:\n1. CAKE / WBNB\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025",
-        },
-      },
+          text: "Here are the 5 newest pools on BSC:\n1. CAKE / WBNB\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
     ],
     [
       {
         user: "{{user1}}",
         content: {
-          text: "List all recent pools on Polygon",
-        },
+          text: "List all recent pools on Polygon"
+        }
       },
       {
         user: "{{agent}}",
         content: {
           text: "I'll get all the recently added pools on Polygon for you.",
-          action: "GET_NETWORK_NEW_POOLS",
-        },
+          action: "GET_NETWORK_NEW_POOLS"
+        }
       },
       {
         user: "{{agent}}",
         content: {
-          text: "Here are all new pools on POLYGON:\n1. MATIC / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025",
-        },
-      },
-    ],
-  ],
+          text: "Here are all new pools on POLYGON:\n1. MATIC / USDC\n   Market Cap: $954,636,707\n   FDV: $6,402,478,508\n   Reserve: $363,641,037\n   Created: 1/19/2025"
+        }
+      }
+    ]
+  ]
 };
 
 // src/index.ts
 var coingeckoPlugin = {
   name: "coingecko",
   description: "CoinGecko Plugin for Eliza",
-  actions: [getPrice_default, getPricePerAddress_default, getTrending_default, getTrendingPools_default, getMarkets_default, getTopGainersLosers_default, getNewlyListed_default, getNetworkTrendingPools_default, getNetworkNewPools_default],
+  actions: [
+    getPrice_default,
+    getPricePerAddress_default,
+    getTrending_default,
+    getTrendingPools_default,
+    getMarkets_default,
+    getTopGainersLosers_default,
+    getNewlyListed_default,
+    getNetworkTrendingPools_default,
+    getNetworkNewPools_default
+  ],
   evaluators: [],
-  providers: [categoriesProvider, coinsProvider, networksProvider],
+  providers: [categoriesProvider, coinsProvider, networksProvider]
 };
 var index_default = coingeckoPlugin;
-export { coingeckoPlugin, index_default as default };
+export {
+  coingeckoPlugin,
+  index_default as default
+};
 //# sourceMappingURL=index.js.map

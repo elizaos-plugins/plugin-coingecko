@@ -9,5 +9,5 @@ export default defineConfig({
   dts: {
     resolve: false, // Don't try to resolve external types
   },
-  external: ["dotenv", "fs", "path", "https", "http", "zod", "@elizaos/core"],
+  external: ["@elizaos/core"],
 });
