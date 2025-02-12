@@ -4081,6 +4081,7 @@ var CACHE_KEY = "coingecko:categories";
 var CACHE_TTL = 5 * 60;
 var MAX_RETRIES = 3;
 async function fetchCategories(runtime) {
+  var _a;
   const config = await validateCoingeckoConfig(runtime);
   const { baseUrl, apiKey, headerKey } = getApiConfig(config);
   const response = await axios.get(
@@ -4094,7 +4095,7 @@ async function fetchCategories(runtime) {
       // 5 second timeout
     }
   );
-  if (!response.data?.length) {
+  if (!((_a = response.data) == null ? void 0 : _a.length)) {
     throw new Error("Invalid categories data received");
   }
   return response.data;
@@ -4273,6 +4274,7 @@ var getMarkets_default = {
   // Comprehensive endpoint for market rankings, supports up to 250 coins per request
   description: "Get ranked list of top cryptocurrencies sorted by market metrics (without specifying coins)",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     elizaLogger2.log("Starting CoinGecko GET_MARKETS handler...");
     let currentState = state;
     if (!currentState) {
@@ -4335,7 +4337,7 @@ var getMarkets_default = {
           }
         }
       );
-      if (!response.data?.length) {
+      if (!((_a = response.data) == null ? void 0 : _a.length)) {
         throw new Error("No market data received from CoinGecko API");
       }
       const formattedData = response.data.map((coin) => ({
@@ -4354,7 +4356,7 @@ var getMarkets_default = {
         maxSupply: coin.max_supply,
         lastUpdated: coin.last_updated
       }));
-      const categoryDisplay = content.category ? `${categories.find((c) => c.category_id === formattedCategory)?.name.toUpperCase() || content.category.toUpperCase()} ` : "";
+      const categoryDisplay = content.category ? `${((_b = categories.find((c) => c.category_id === formattedCategory)) == null ? void 0 : _b.name.toUpperCase()) || content.category.toUpperCase()} ` : "";
       const responseText = [
         `Top ${formattedData.length} ${categoryDisplay}Cryptocurrencies by ${content.order === "volume_desc" || content.order === "volume_asc" ? "Volume" : "Market Cap"}:`,
         ...formattedData.map(
@@ -4382,11 +4384,11 @@ var getMarkets_default = {
     } catch (error) {
       elizaLogger2.error("Error in GET_MARKETS handler:", error);
       let errorMessage;
-      if (error.response?.status === 429) {
+      if (((_c = error.response) == null ? void 0 : _c.status) === 429) {
         errorMessage = "Rate limit exceeded. Please try again later.";
-      } else if (error.response?.status === 403) {
+      } else if (((_d = error.response) == null ? void 0 : _d.status) === 403) {
         errorMessage = "This endpoint requires a CoinGecko Pro API key. Please upgrade your plan to access this data.";
-      } else if (error.response?.status === 400) {
+      } else if (((_e = error.response) == null ? void 0 : _e.status) === 400) {
         errorMessage = "Invalid request parameters. Please check your input.";
       } else {
         errorMessage = `Error fetching market data: ${error.message}`;
@@ -4396,9 +4398,9 @@ var getMarkets_default = {
           text: errorMessage,
           error: {
             message: error.message,
-            statusCode: error.response?.status,
-            params: error.config?.params,
-            requiresProPlan: error.response?.status === 403
+            statusCode: (_f = error.response) == null ? void 0 : _f.status,
+            params: (_g = error.config) == null ? void 0 : _g.params,
+            requiresProPlan: ((_h = error.response) == null ? void 0 : _h.status) === 403
           }
         });
       }
@@ -4446,6 +4448,7 @@ var CACHE_KEY2 = "coingecko:coins";
 var CACHE_TTL2 = 5 * 60;
 var MAX_RETRIES2 = 3;
 async function fetchCoins(runtime, includePlatform = false) {
+  var _a;
   const config = await validateCoingeckoConfig(runtime);
   const { baseUrl, apiKey, headerKey } = getApiConfig(config);
   const response = await axios3.get(
@@ -4462,7 +4465,7 @@ async function fetchCoins(runtime, includePlatform = false) {
       // 5 second timeout
     }
   );
-  if (!response.data?.length) {
+  if (!((_a = response.data) == null ? void 0 : _a.length)) {
     throw new Error("Invalid coins data received");
   }
   return response.data;
@@ -4635,6 +4638,7 @@ var getPrice_default = {
   },
   description: "Get price and basic market data for one or more specific cryptocurrencies (by name/symbol)",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b, _c, _d, _e, _f;
     elizaLogger4.log("Starting CoinGecko GET_PRICE handler...");
     let currentState = state;
     if (!currentState) {
@@ -4782,11 +4786,11 @@ var getPrice_default = {
     } catch (error) {
       elizaLogger4.error("Error in GET_PRICE handler:", error);
       let errorMessage;
-      if (error.response?.status === 429) {
+      if (((_a = error.response) == null ? void 0 : _a.status) === 429) {
         errorMessage = "Rate limit exceeded. Please try again later.";
-      } else if (error.response?.status === 403) {
+      } else if (((_b = error.response) == null ? void 0 : _b.status) === 403) {
         errorMessage = "This endpoint requires a CoinGecko Pro API key. Please upgrade your plan to access this data.";
-      } else if (error.response?.status === 400) {
+      } else if (((_c = error.response) == null ? void 0 : _c.status) === 400) {
         errorMessage = "Invalid request parameters. Please check your input.";
       }
       if (callback) {
@@ -4794,9 +4798,9 @@ var getPrice_default = {
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status,
-            params: error.config?.params,
-            requiresProPlan: error.response?.status === 403
+            statusCode: (_d = error.response) == null ? void 0 : _d.status,
+            params: (_e = error.config) == null ? void 0 : _e.params,
+            requiresProPlan: ((_f = error.response) == null ? void 0 : _f.status) === 403
           }
         });
       }
@@ -4934,6 +4938,7 @@ var getPricePerAddress_default = {
   },
   description: "Get the current USD price for a token using its blockchain address",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
     elizaLogger5.log("Starting GET_TOKEN_PRICE_BY_ADDRESS handler...");
     let currentState = state;
     if (!currentState) {
@@ -4973,7 +4978,7 @@ var getPricePerAddress_default = {
         }
       );
       const tokenData = response.data;
-      if (!tokenData.market_data?.current_price?.usd) {
+      if (!((_b = (_a = tokenData.market_data) == null ? void 0 : _a.current_price) == null ? void 0 : _b.usd)) {
         throw new Error(
           `No price data available for token ${content.tokenAddress} on ${content.chainId}`
         );
@@ -4984,7 +4989,7 @@ var getPricePerAddress_default = {
         `Chain: ${content.chainId}`,
         `Price: $${tokenData.market_data.current_price.usd.toFixed(6)} USD`
       ];
-      if (tokenData.market_data.market_cap?.usd) {
+      if ((_c = tokenData.market_data.market_cap) == null ? void 0 : _c.usd) {
         parts.push(
           `Market Cap: $${tokenData.market_data.market_cap.usd.toLocaleString()} USD`
         );
@@ -5001,7 +5006,7 @@ var getPricePerAddress_default = {
               address: content.tokenAddress,
               chain: content.chainId,
               price: tokenData.market_data.current_price.usd,
-              marketCap: tokenData.market_data.market_cap?.usd
+              marketCap: (_d = tokenData.market_data.market_cap) == null ? void 0 : _d.usd
             }
           }
         });
@@ -5013,11 +5018,11 @@ var getPricePerAddress_default = {
         error
       );
       let errorMessage;
-      if (error.response?.status === 429) {
+      if (((_e = error.response) == null ? void 0 : _e.status) === 429) {
         errorMessage = "Rate limit exceeded. Please try again later.";
-      } else if (error.response?.status === 403) {
+      } else if (((_f = error.response) == null ? void 0 : _f.status) === 403) {
         errorMessage = "This endpoint requires a CoinGecko Pro API key. Please upgrade your plan to access this data.";
-      } else if (error.response?.status === 400) {
+      } else if (((_g = error.response) == null ? void 0 : _g.status) === 400) {
         errorMessage = "Invalid request parameters. Please check your input.";
       } else {
         errorMessage = "Failed to fetch token price. Please try again later.";
@@ -5027,8 +5032,8 @@ var getPricePerAddress_default = {
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status,
-            requiresProPlan: error.response?.status === 403
+            statusCode: (_h = error.response) == null ? void 0 : _h.status,
+            requiresProPlan: ((_i = error.response) == null ? void 0 : _i.status) === 403
           }
         });
       }
@@ -5147,6 +5152,7 @@ var getTopGainersLosers_default = {
   },
   description: "Get list of top gaining and losing cryptocurrencies by price change",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b, _c, _d, _e, _f;
     elizaLogger6.log("Starting CoinGecko GET_TOP_GAINERS_LOSERS handler...");
     let currentState = state;
     if (!currentState) {
@@ -5230,11 +5236,11 @@ var getTopGainersLosers_default = {
     } catch (error) {
       elizaLogger6.error("Error in GET_TOP_GAINERS_LOSERS handler:", error);
       let errorMessage;
-      if (error.response?.status === 429) {
+      if (((_a = error.response) == null ? void 0 : _a.status) === 429) {
         errorMessage = "Rate limit exceeded. Please try again later.";
-      } else if (error.response?.status === 403) {
+      } else if (((_b = error.response) == null ? void 0 : _b.status) === 403) {
         errorMessage = "This endpoint requires a CoinGecko Pro API key. Please upgrade your plan to access this data.";
-      } else if (error.response?.status === 400) {
+      } else if (((_c = error.response) == null ? void 0 : _c.status) === 400) {
         errorMessage = "Invalid request parameters. Please check your input.";
       } else {
         errorMessage = `Error fetching top gainers/losers data: ${error.message}`;
@@ -5244,9 +5250,9 @@ var getTopGainersLosers_default = {
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status,
-            params: error.config?.params,
-            requiresProPlan: error.response?.status === 403
+            statusCode: (_d = error.response) == null ? void 0 : _d.status,
+            params: (_e = error.config) == null ? void 0 : _e.params,
+            requiresProPlan: ((_f = error.response) == null ? void 0 : _f.status) === 403
           }
         });
       }
@@ -5370,6 +5376,7 @@ var getTrending_default = {
   },
   description: "Get list of trending cryptocurrencies, NFTs, and categories from CoinGecko",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b;
     elizaLogger7.log("Starting CoinGecko GET_TRENDING handler...");
     let currentState = state;
     if (!currentState) {
@@ -5452,13 +5459,13 @@ var getTrending_default = {
       return true;
     } catch (error) {
       elizaLogger7.error("Error in GET_TRENDING handler:", error);
-      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending data: ${error.message}`;
+      const errorMessage = ((_a = error.response) == null ? void 0 : _a.status) === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending data: ${error.message}`;
       if (callback) {
         callback({
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status
+            statusCode: (_b = error.response) == null ? void 0 : _b.status
           }
         });
       }
@@ -5567,6 +5574,7 @@ var getTrendingPools_default = {
   },
   description: "Get list of trending pools from CoinGecko's onchain data",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b;
     elizaLogger8.log("Starting CoinGecko GET_TRENDING_POOLS handler...");
     let currentState = state;
     if (!currentState) {
@@ -5653,13 +5661,13 @@ var getTrendingPools_default = {
       return true;
     } catch (error) {
       elizaLogger8.error("Error in GET_TRENDING_POOLS handler:", error);
-      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending pools data: ${error.message}`;
+      const errorMessage = ((_a = error.response) == null ? void 0 : _a.status) === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending pools data: ${error.message}`;
       if (callback) {
         callback({
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status
+            statusCode: (_b = error.response) == null ? void 0 : _b.status
           }
         });
       }
@@ -5794,6 +5802,7 @@ var getNewlyListed_default = {
   },
   description: "Get list of recently added coins from CoinGecko",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b;
     elizaLogger9.log("Starting CoinGecko GET_NEW_COINS handler...");
     let currentState = state;
     if (!currentState) {
@@ -5863,13 +5872,13 @@ var getNewlyListed_default = {
       return true;
     } catch (error) {
       elizaLogger9.error("Error in GET_NEW_COINS handler:", error);
-      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching new coins data: ${error.message}`;
+      const errorMessage = ((_a = error.response) == null ? void 0 : _a.status) === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching new coins data: ${error.message}`;
       if (callback) {
         callback({
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status
+            statusCode: (_b = error.response) == null ? void 0 : _b.status
           }
         });
       }
@@ -5958,6 +5967,7 @@ var CACHE_KEY3 = "coingecko:networks";
 var CACHE_TTL3 = 30 * 60;
 var MAX_RETRIES3 = 3;
 async function fetchNetworks(runtime) {
+  var _a, _b;
   const config = await validateCoingeckoConfig(runtime);
   const { baseUrl, apiKey, headerKey } = getApiConfig(config);
   const response = await axios10.get(
@@ -5971,7 +5981,7 @@ async function fetchNetworks(runtime) {
       // 5 second timeout
     }
   );
-  if (!response.data?.data?.length) {
+  if (!((_b = (_a = response.data) == null ? void 0 : _a.data) == null ? void 0 : _b.length)) {
     throw new Error("Invalid networks data received");
   }
   return response.data.data;
@@ -6056,6 +6066,7 @@ var getNetworkTrendingPools_default = {
   },
   description: "Get list of trending pools for a specific network from CoinGecko's onchain data",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b;
     elizaLogger11.log(
       "Starting CoinGecko GET_NETWORK_TRENDING_POOLS handler..."
     );
@@ -6168,13 +6179,13 @@ var getNetworkTrendingPools_default = {
         "Error in GET_NETWORK_TRENDING_POOLS handler:",
         error
       );
-      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending pools data: ${error.message}`;
+      const errorMessage = ((_a = error.response) == null ? void 0 : _a.status) === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching trending pools data: ${error.message}`;
       if (callback) {
         callback({
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status
+            statusCode: (_b = error.response) == null ? void 0 : _b.status
           }
         });
       }
@@ -6319,6 +6330,7 @@ var getNetworkNewPools_default = {
   },
   description: "Get list of newly created pools for a specific network from CoinGecko's onchain data",
   handler: async (runtime, message, state, _options, callback) => {
+    var _a, _b;
     elizaLogger12.log("Starting CoinGecko GET_NETWORK_NEW_POOLS handler...");
     let currentState = state;
     if (!currentState) {
@@ -6425,13 +6437,13 @@ var getNetworkNewPools_default = {
       return true;
     } catch (error) {
       elizaLogger12.error("Error in GET_NETWORK_NEW_POOLS handler:", error);
-      const errorMessage = error.response?.status === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching new pools data: ${error.message}`;
+      const errorMessage = ((_a = error.response) == null ? void 0 : _a.status) === 429 ? "Rate limit exceeded. Please try again later." : `Error fetching new pools data: ${error.message}`;
       if (callback) {
         callback({
           text: errorMessage,
           content: {
             error: error.message,
-            statusCode: error.response?.status
+            statusCode: (_b = error.response) == null ? void 0 : _b.status
           }
         });
       }
