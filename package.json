@@ -32,7 +32,8 @@
         "type": "string"
       },
       "COINGECKO_PRO_API_KEY": {
-        "type": "string"
+        "type": "string",
+        "optional": true
       }
     }
   }
